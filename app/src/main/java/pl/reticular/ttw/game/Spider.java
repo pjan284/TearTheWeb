@@ -32,6 +32,7 @@ import java.util.Random;
 import pl.reticular.ttw.game.graph.Edge;
 import pl.reticular.ttw.game.graph.Graph;
 import pl.reticular.ttw.game.graph.Node;
+import pl.reticular.ttw.utils.Modulo;
 import pl.reticular.ttw.utils.Vector2;
 
 public class Spider {
@@ -205,26 +206,6 @@ public class Spider {
 		canvas.restore();
 	}
 
-	private float moduloDistance(float a, float b, float modulo) {
-		if (a < b) {
-			float diff1 = b - a;
-			float diff2 = a + (modulo - b);
-			if (diff1 < diff2) {
-				return -diff1;
-			} else {
-				return diff2;
-			}
-		} else {
-			float diff1 = a - b;
-			float diff2 = b + (modulo - a);
-			if (diff1 < diff2) {
-				return diff1;
-			} else {
-				return -diff2;
-			}
-		}
-	}
-
 	public void update(float dt, Vector2 gravity) {
 		if (mode != MODE_FALLING) {
 			float len = spring.length();
@@ -247,7 +228,7 @@ public class Spider {
 
 			float desiredRot = (float) (spring.getAngle(upVector, target) * 180 / Math.PI);
 
-			float diffRot = moduloDistance(desiredRot, rotation, 360.0f);
+			float diffRot = Modulo.angleDifference(rotation, desiredRot);
 
 			rotation += diffRot / 10.0f;
 		} else {
