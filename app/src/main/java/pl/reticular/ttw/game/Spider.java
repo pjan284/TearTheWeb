@@ -22,6 +22,7 @@ package pl.reticular.ttw.game;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.RectF;
 import android.support.v4.util.Pair;
 import android.util.Log;
 
@@ -34,45 +35,45 @@ import pl.reticular.ttw.game.graph.Node;
 import pl.reticular.ttw.utils.Vector2;
 
 public class Spider {
-	int mode;
-	Graph graph;
+	private int mode;
+	private Graph graph;
 
 	/**
 	 * Spring on which spider sits
 	 */
-	Spring spring;
+	private Spring spring;
 
 	/**
 	 * Spider position on spring
 	 */
-	float springPercent;
+	private float springPercent;
 
 	/**
 	 * End of the spring towards which spider is currently going.
 	 */
-	Particle target;
+	private Particle target;
 
-	static final float SPEED_NORMAL = 0.25f;
-	static final float SPEED_FURIOUS = 0.5f;
+	private static final float SPEED_NORMAL = 0.25f;
+	private static final float SPEED_FURIOUS = 0.5f;
 
-	Paint paint;
+	private Paint paint;
 
-	Random generator;
+	private Random generator;
 
 	/**
 	 * Walks randomly
 	 */
-	public static final int MODE_RANDOM = 0;
+	private static final int MODE_RANDOM = 0;
 
 	/**
 	 * Walks through path to a place where finger is
 	 */
-	public static final int MODE_ATTACK = 1;
+	private static final int MODE_ATTACK = 1;
 
 	/**
 	 * Lost spring and falling down
 	 */
-	public static final int MODE_FALLING = 2;
+	private static final int MODE_FALLING = 2;
 
 	private LinkedList<Node> path;
 
@@ -80,35 +81,14 @@ public class Spider {
 	private Vector2 velocity;
 	private float rotation;
 
-	private static float legs[] = {
-			0, 0, 12, -8,
-			12, -8, 16, -4,
-
-			0, 0, 12, -4,
-			12, -4, 16, 0,
-
-			0, 0, 12, 0,
-			12, 0, 16, 4,
-
-			0, 0, 12, 4,
-			12, 4, 16, 8,
-
-			0, 0, -12, -8,
-			-12, -8, -16, -4,
-
-			0, 0, -12, -4,
-			-12, -4, -16, 0,
-
-			0, 0, -12, 0,
-			-12, 0, -16, 4,
-
-			0, 0, -12, 4,
-			-12, 4, -16, 8,
-	};
+	private float legs[];
+	private float jaws[];
+	private RectF body;
+	private RectF head;
 
 	private static Vector2 upVector = new Vector2(0.0f, 1.0f);
 
-	Spider(Graph graph) {
+	public Spider(Graph graph) {
 		this.graph = graph;
 
 		spring = (Spring) graph.getRandomEdge();
@@ -126,6 +106,40 @@ public class Spider {
 
 		position = new Vector2();
 		rotation = 0;
+
+		legs = new float[]{
+				0, 0, 8, -8,
+				8, -8, 6, -19,
+
+				0, 0, 12, -4,
+				12, -4, 16, -16,
+
+				0, 0, 8, 8,
+				8, 8, 6, 19,
+
+				0, 0, 12, 4,
+				12, 4, 16, 16,
+
+				0, 0, -8, -8,
+				-8, -8, -6, -19,
+
+				0, 0, -12, -4,
+				-12, -4, -16, -16,
+
+				0, 0, -8, 8,
+				-8, 8, -6, 19,
+
+				0, 0, -12, 4,
+				-12, 4, -16, 16,
+		};
+
+		jaws = new float[]{
+				0, -4, -2, -10,
+				0, -4, 2, -10,
+		};
+
+		body = new RectF(-4.0f, 12.0f, 4.0f, 0.0f);
+		head = new RectF(-3.0f, 0.0f, 3.0f, -8.0f);
 	}
 
 	private Pair<Particle, Spring> nextTargetAtRandom() {
@@ -155,7 +169,7 @@ public class Spider {
 		return new Pair<>((Particle) nextTarget, nextSpring);
 	}
 
-	void findNextTarget() {
+	private void findNextTarget() {
 		Pair<Particle, Spring> pair = nextTargetAtRandom();
 
 		if (mode == MODE_ATTACK) {
@@ -171,7 +185,7 @@ public class Spider {
 		springPercent = 0.0f;
 	}
 
-	void draw(Canvas canvas, float scale) {
+	public void draw(Canvas canvas, float scale) {
 		float x = position.X * scale;
 		float y = position.Y * scale;
 
@@ -179,7 +193,12 @@ public class Spider {
 		canvas.translate(x, y);
 		canvas.rotate(-rotation, 0, 0);
 
-		canvas.drawCircle(0, 0, 8.0f, paint);
+		//canvas.drawCircle(0, 0, 4.0f, paint);
+
+		canvas.drawOval(body, paint);
+		canvas.drawOval(head, paint);
+
+		canvas.drawLines(jaws, 0, jaws.length, paint);
 
 		canvas.drawLines(legs, 0, legs.length, paint);
 
@@ -206,7 +225,7 @@ public class Spider {
 		}
 	}
 
-	void update(float dt, Vector2 gravity) {
+	public void update(float dt, Vector2 gravity) {
 		if (mode != MODE_FALLING) {
 			float len = spring.length();
 
