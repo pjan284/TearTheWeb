@@ -226,7 +226,7 @@ public class Spider {
 			velocity = Vector2.scale(Vector2.sub(newPosition, position), 1 / dt);
 			position = newPosition;
 
-			float desiredRot = (float) (spring.getAngle(upVector, target) * 180 / Math.PI);
+			float desiredRot = spring.getAngle(upVector, target);
 
 			float diffRot = Modulo.angleDifference(rotation, desiredRot);
 

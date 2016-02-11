@@ -155,7 +155,7 @@ public class Spring extends Edge {
 		}
 	}
 
-	public double getAngle(Vector2 base, Node end) {
+	public float getAngle(Vector2 base, Node end) {
 		Vector2 p1 = particle1.getPos();
 		Vector2 p2 = particle2.getPos();
 		if (end == node2) {

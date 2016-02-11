@@ -118,20 +118,20 @@ public class Vector2 {
 		return v1.X * v2.X + v1.Y * v2.Y;
 	}
 
-	public double angle(Vector2 v2) {
+	public float angle(Vector2 v2) {
 		double a = Math.atan2(v2.Y, v2.X) - Math.atan2(Y, X);
 		if (a < 0) {
 			a = a + 2 * Math.PI;
 		}
-		return a;
+		return (float) (a * 180 / Math.PI);
 	}
 
-	public static double angle(Vector2 v1, Vector2 v2) {
+	public static float angle(Vector2 v1, Vector2 v2) {
 		double a = Math.atan2(v2.Y, v2.X) - Math.atan2(v1.Y, v1.X);
 		if (a < 0) {
 			a = a + 2 * Math.PI;
 		}
-		return a;
+		return (float) (a * 180 / Math.PI);
 	}
 
 	public float length() {
