@@ -75,18 +75,30 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
 			continueGame = bundle.getBoolean(KEY_CONTINUE_GAME, false);
 		}
 
-		Game game;
-		if (continueGame && Settings.hasLastGame(this)) {
+		// try to load last played game
+		Game lastGame = null;
+		if (Settings.hasLastGame(this)) {
 			try {
-				game = new Game(this, new MessageHandler(this), Settings.getLastGame(this));
+				lastGame = new Game(this, new MessageHandler(this), Settings.getLastGame(this));
 			} catch (JSONException e) {
 				e.printStackTrace();
-				game = new Game(this, new MessageHandler(this));
 			} catch (Game.GameFinishedException e) {
 				Settings.clearLastGame(this);
+			}
+		}
+
+		Game game;
+		if (continueGame) {
+			if (lastGame != null) {
+				game = lastGame;
+			} else {
 				game = new Game(this, new MessageHandler(this));
 			}
 		} else {
+			if (lastGame != null) {
+				Settings.saveHighScore(this, lastGame.getScore());
+			}
+			Settings.clearLastGame(this);
 			game = new Game(this, new MessageHandler(this));
 		}
 

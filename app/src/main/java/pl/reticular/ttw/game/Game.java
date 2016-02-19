@@ -287,6 +287,10 @@ public class Game {
 		messageScore();
 	}
 
+	public int getScore() {
+		return score;
+	}
+
 	public void update(float dt) {
 
 		web.update(dt, gravity);
