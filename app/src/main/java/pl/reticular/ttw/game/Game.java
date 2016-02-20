@@ -23,6 +23,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.RectF;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -65,6 +66,8 @@ public class Game {
 	private int canvasHeight = 1;
 	private int canvasWidth = 1;
 	private float canvasScale = 1.0f;
+
+	private RectF gameArea;
 
 	private Bitmap backgroundImage;
 
@@ -255,7 +258,11 @@ public class Game {
 		//backgroundImage = Bitmap.createScaledBitmap(backgroundImage, width, height, true);
 
 		int min = Math.min(width, height);
-		canvasScale = min / 2;
+		canvasScale = min * 0.5f;
+
+		float x = (float) width / (float) min;
+		float y = (float) height / (float) min;
+		gameArea = new RectF(-x, -y, x, y);
 	}
 
 	public void frame(Canvas canvas, float dt) {
@@ -298,14 +305,10 @@ public class Game {
 		LinkedList<Spider> spidersToRemove = new LinkedList<>();
 
 		for (Spider spider : spiders) {
-			spider.update(dt, gravity);
-
-			// check level up conditions
-			if (!isFinished()) {
-				Vector2 pos = spider.getPosition();
-				float x = pos.X * canvasScale + canvasWidth / 2;
-				float y = pos.Y * canvasScale + canvasHeight / 2;
-				if (x < 0 || x > canvasWidth || y < 0 || y > canvasHeight) {
+			try {
+				spider.update(dt, gravity, gameArea);
+			} catch (Spider.OutException e) {
+				if (!isFinished()) {
 					spidersToRemove.add(spider);
 				}
 			}

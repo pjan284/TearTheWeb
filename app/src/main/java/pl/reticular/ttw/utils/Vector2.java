@@ -19,6 +19,8 @@ package pl.reticular.ttw.utils;
  * along with Tear The Web. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import android.graphics.RectF;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -156,5 +158,9 @@ public class Vector2 {
 
 	public static Vector2 lerp(Vector2 v1, Vector2 v2, float a) {
 		return new Vector2(v1.X + (v2.X - v1.X) * a, v1.Y + (v2.Y - v1.Y) * a);
+	}
+
+	public boolean isInBounds(RectF bounds) {
+		return (X >= bounds.left && X <= bounds.right && Y >= bounds.top && Y <= bounds.bottom);
 	}
 }

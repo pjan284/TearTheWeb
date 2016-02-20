@@ -91,6 +91,11 @@ public class Spider {
 
 	private static Vector2 upVector = new Vector2(0.0f, 1.0f);
 
+	public class OutException extends Exception {
+	}
+
+	;
+
 	public Spider(Graph graph) {
 		this.graph = graph;
 
@@ -210,13 +215,21 @@ public class Spider {
 		canvas.restore();
 	}
 
-	public void update(float dt, Vector2 gravity) {
+	public void update(float dt, Vector2 gravity, RectF gameArea) throws OutException {
 		if (mode != MODE_FALLING) {
 			float len = spring.length();
 
 			float speed = SPEED_NORMAL;
 			if (mode == MODE_ATTACK) {
 				speed = SPEED_FURIOUS;
+			}
+
+			// Avoid committing suicide
+			if (!target.getPos().isInBounds(gameArea)) {
+				//reverse
+				target = (Particle) spring.next(target);
+				springPercent = 1.0f - springPercent;
+				switchToRandom();
 			}
 
 			springPercent += (speed * dt) / len;
@@ -238,6 +251,10 @@ public class Spider {
 		} else {
 			velocity.add(Vector2.scale(gravity, dt));
 			position.add(Vector2.scale(velocity, dt));
+		}
+
+		if (!position.isInBounds(gameArea)) {
+			throw new OutException();
 		}
 	}
 
