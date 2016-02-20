@@ -78,6 +78,8 @@ public class Spider {
 
 	private LinkedList<Node> path;
 
+	private int fingerDetectDistance;
+
 	private Vector2 position;
 	private Vector2 velocity;
 	private float rotation;
@@ -104,6 +106,8 @@ public class Spider {
 		generator = new Random();
 
 		path = null;
+
+		fingerDetectDistance = 10;
 
 		position = new Vector2();
 		rotation = 0;
@@ -254,7 +258,7 @@ public class Spider {
 	}
 
 	private void switchToAttack(Node fingerNode) {
-		LinkedList<Node> newPath = graph.findPathToNode(target, fingerNode);
+		LinkedList<Node> newPath = graph.findPathToNode(target, fingerNode, fingerDetectDistance);
 		if (newPath != null) {
 			Node node = newPath.removeFirst();
 			if (node != target) {

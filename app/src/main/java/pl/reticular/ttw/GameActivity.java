@@ -82,6 +82,7 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
 				lastGame = new Game(this, new MessageHandler(this), Settings.getLastGame(this));
 			} catch (JSONException e) {
 				e.printStackTrace();
+				Settings.clearLastGame(this);
 			} catch (Game.GameFinishedException e) {
 				Settings.clearLastGame(this);
 			}

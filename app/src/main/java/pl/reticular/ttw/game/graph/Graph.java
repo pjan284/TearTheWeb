@@ -125,29 +125,39 @@ public abstract class Graph {
 	/**
 	 * Non-optimal implementation of BFS
 	 *
-	 * @param start  start node
-	 * @param toFind end node
+	 * @param start    start node
+	 * @param toFind   end node
+	 * @param maxLevel max hops number or -1
 	 * @return List of Nodes from start (included) to toFind (included) if path exists or
 	 * null if path doesn't exist or has 0 elements
 	 */
-	public LinkedList<Node> findPathToNode(Node start, Node toFind) {
+	public LinkedList<Node> findPathToNode(Node start, Node toFind, int maxLevel) {
 		if (start == toFind || toFind == null || start == null) {
 			return null;
 		}
 		HashMap<Node, Node> previous = new HashMap<>();
+		HashMap<Node, Integer> levels = new HashMap<>();
 		LinkedList<Node> queue = new LinkedList<>();
 		queue.add(start);
 		previous.put(start, null);
+		levels.put(start, 0);
 		while (!queue.isEmpty()) {
 			Node v = queue.remove();
 			if (v == toFind) {
 				return previousToPath(v, previous);
 			}
+
+			int level = levels.get(v);
+			if (level > maxLevel && maxLevel != -1) {
+				return null;
+			}
+
 			for (Edge e : v.getEdges()) {
 				Node next = e.next(v);
 				if (!previous.containsKey(next)) {
 					queue.add(next);
 					previous.put(next, v);
+					levels.put(next, level + 1);
 				}
 			}
 		}
