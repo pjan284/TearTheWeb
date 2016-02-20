@@ -99,7 +99,9 @@ public class Web extends Graph {
 	protected void update(float dt, Vector2 gravity) {
 		for (int i = 0; i < physicsAccuracy; i++) {
 			for (Edge edge : edges) {
-				if (((Spring) edge).resolveVerlet()) {
+				try {
+					((Spring) edge).resolveVerlet();
+				} catch (Spring.BrokenException e) {
 					destroyEdge(edge);
 				}
 			}

@@ -43,6 +43,11 @@ public class Spring extends Edge {
 	public static final String KEY_NODE1 = "Node1";
 	public static final String KEY_NODE2 = "Node2";
 
+	public class BrokenException extends Exception {
+	}
+
+	;
+
 	public Spring(Particle particle1, Particle particle2, float length) {
 		super(particle1, particle2);
 		this.particle1 = (Particle) node1;
@@ -84,7 +89,7 @@ public class Spring extends Edge {
 		return d.length();
 	}
 
-	public boolean resolveVerlet() {
+	public void resolveVerlet() throws BrokenException {
 		Vector2 p1 = particle1.getPos();
 		Vector2 p2 = particle2.getPos();
 
@@ -94,11 +99,11 @@ public class Spring extends Edge {
 		float currentLength = Vector2.length(lx, ly);
 
 		if (currentLength < defaultLength) {
-			return false;
+			return;
 		}
 
 		if (currentLength > defaultLength * tearFactor) {
-			return true;
+			throw new BrokenException();
 		}
 
 		float diff = defaultLength - currentLength;
@@ -112,8 +117,6 @@ public class Spring extends Edge {
 		//try to restore original length
 		particle1.getPos().add(diffX, diffY);
 		particle2.getPos().add(-diffX, -diffY);
-
-		return false;
 	}
 
 	public void draw(Canvas canvas, float scale) {
