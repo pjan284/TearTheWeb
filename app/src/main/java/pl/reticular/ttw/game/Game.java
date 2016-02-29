@@ -32,6 +32,7 @@ import android.view.MotionEvent;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 
 import pl.reticular.ttw.game.graph.Edge;
@@ -302,25 +303,22 @@ public class Game {
 
 		web.update(dt, gravity);
 
-		LinkedList<Spider> spidersToRemove = new LinkedList<>();
-
-		for (Spider spider : spiders) {
+		Iterator<Spider> it = spiders.iterator();
+		while (it.hasNext()) {
+			Spider spider = it.next();
 			try {
 				spider.update(dt, gravity, gameArea);
 			} catch (Spider.OutException e) {
 				if (!isFinished()) {
-					spidersToRemove.add(spider);
+					it.remove();
+					messageSpidersLeft();
+					addScore(10);
 				}
 			}
 		}
 
-		for (Spider spider : spidersToRemove) {
-			spiders.remove(spider);
-			messageSpidersLeft();
-			addScore(10);
-			if (spiders.size() == 0) {
-				levelUp();
-			}
+		if (spiders.size() == 0) {
+			levelUp();
 		}
 
 		finger.update(dt);

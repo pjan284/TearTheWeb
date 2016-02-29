@@ -29,58 +29,31 @@ public abstract class Graph {
 	protected ArrayList<Node> nodes;
 	protected ArrayList<Edge> edges;
 
-	protected ArrayList<Edge> edgesToRemove;
-	protected ArrayList<Node> nodesToRemove;
-
 	private GraphObserver observer;
 
 	public Graph() {
 		nodes = new ArrayList<>();
 		edges = new ArrayList<>();
-
-		edgesToRemove = new ArrayList<>();
-		nodesToRemove = new ArrayList<>();
 	}
 
 	public void setObserver(GraphObserver go) {
 		observer = go;
 	}
 
-	public void destroyEdge(Edge edge) {
+	public void onRemoveEdge(Edge edge) {
 		Node n1 = edge.getNode1();
 		n1.removeEdge(edge);
 		if (n1.getEdges().size() == 0) {
-			destroyNode(n1);
+			nodes.remove(n1);
 		}
 
 		Node n2 = edge.getNode2();
 		n2.removeEdge(edge);
 		if (n2.getEdges().size() == 0) {
-			destroyNode(n2);
+			nodes.remove(n2);
 		}
 
-		edgesToRemove.add(edge);
-	}
-
-	private void destroyNode(Node node) {
-		nodesToRemove.add(node);
-	}
-
-	protected void clean() {
-		if (nodesToRemove.size() != 0) {
-			for (Node rm : nodesToRemove) {
-				nodes.remove(rm);
-			}
-		}
-		nodesToRemove.clear();
-
-		if (edgesToRemove.size() != 0) {
-			for (Edge edge : edgesToRemove) {
-				edges.remove(edge);
-				observer.onEdgeRemoved(edge);
-			}
-		}
-		edgesToRemove.clear();
+		observer.onEdgeRemoved(edge);
 	}
 
 	public Edge getRandomEdge() {

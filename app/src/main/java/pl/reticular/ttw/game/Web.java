@@ -98,11 +98,14 @@ public class Web extends Graph {
 
 	protected void update(float dt, Vector2 gravity) {
 		for (int i = 0; i < physicsAccuracy; i++) {
-			for (Edge edge : edges) {
+			Iterator<Edge> it = edges.iterator();
+			while (it.hasNext()) {
+				Edge edge = it.next();
 				try {
 					((Spring) edge).resolveVerlet();
 				} catch (Spring.BrokenException e) {
-					destroyEdge(edge);
+					onRemoveEdge(edge);
+					it.remove();
 				}
 			}
 		}
@@ -110,8 +113,6 @@ public class Web extends Graph {
 		for (Node node : nodes) {
 			((Particle) node).update(dt, gravity);
 		}
-
-		clean();
 	}
 
 	protected void draw(Canvas canvas, float scale) {
@@ -122,15 +123,6 @@ public class Web extends Graph {
 		for (Node node : nodes) {
 			((Particle) node).draw(canvas, scale);
 		}
-	}
-
-	void destroyNearestSpring(float x, float y, float r) {
-		for (Edge edge : edges) {
-			if (((Spring) edge).scissors(x, y, r * r)) {
-				destroyEdge(edge);
-			}
-		}
-		clean();
 	}
 
 	Particle selectParticleInRange(Vector2 clickPos, float r) {
