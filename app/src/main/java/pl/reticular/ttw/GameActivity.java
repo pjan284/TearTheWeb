@@ -164,24 +164,25 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
 		@Override
 		public void handleMessage(Message msg) {
 			GameActivity gameActivity = gameActivityWeakReference.get();
+			Bundle data = msg.getData();
 			if (gameActivity != null) {
-				switch (msg.getData().getInt(Game.MESSAGE_TYPE)) {
-					case Game.MESSAGE_LIVES_LEFT:
-						int livesLeft = msg.getData().getInt(Game.MESSAGE_DATA);
+				switch (Game.MessageType.valueOf(data.getString(Game.MessageFields.Type.toString()))) {
+					case LivesLeft:
+						int livesLeft = data.getInt(Game.MessageFields.Data.toString());
 						gameActivity.displayLivesLeft(livesLeft);
 						break;
-					case Game.MESSAGE_SPIDERS_LEFT:
+					case SpidersLeft:
 						break;
-					case Game.MESSAGE_SCORE:
-						int score = msg.getData().getInt(Game.MESSAGE_DATA);
+					case Score:
+						int score = data.getInt(Game.MessageFields.Data.toString());
 						gameActivity.displayScore(score);
 						break;
-					case Game.MESSAGE_GAME_OVER:
-						int gameScore = msg.getData().getInt(Game.MESSAGE_DATA);
+					case GameOver:
+						int gameScore = data.getInt(Game.MessageFields.Data.toString());
 						gameActivity.gameOver(gameScore);
 						break;
-					case Game.MESSAGE_LEVEL_UP:
-						int level = msg.getData().getInt(Game.MESSAGE_DATA);
+					case LevelUp:
+						int level = data.getInt(Game.MessageFields.Data.toString());
 						gameActivity.displayLevelUp(level);
 						break;
 				}

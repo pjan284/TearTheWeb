@@ -34,8 +34,11 @@ import pl.reticular.ttw.utils.Vector2;
 
 public class Web extends Graph {
 
-	private static final String KEY_PARTICLES = "Particles";
-	private static final String KEY_SPRINGS = "Springs";
+	private enum Keys {
+		Particles,
+		Springs
+	}
+
 	protected final int physicsAccuracy = 1;
 
 	Web() {
@@ -45,8 +48,8 @@ public class Web extends Graph {
 	Web(JSONObject json) throws JSONException {
 		super();
 
-		JSONArray particles = json.getJSONArray(KEY_PARTICLES);
-		JSONArray springs = json.getJSONArray(KEY_SPRINGS);
+		JSONArray particles = json.getJSONArray(Keys.Particles.toString());
+		JSONArray springs = json.getJSONArray(Keys.Springs.toString());
 
 		for (int i = 0; i < particles.length(); i++) {
 			JSONObject particleState = particles.getJSONObject(i);
@@ -56,9 +59,9 @@ public class Web extends Graph {
 
 		for (int i = 0; i < springs.length(); i++) {
 			JSONObject springState = springs.getJSONObject(i);
-			Particle p1 = (Particle) nodes.get(springState.getInt(Spring.KEY_NODE1));
-			Particle p2 = (Particle) nodes.get(springState.getInt(Spring.KEY_NODE2));
-			float defaultLength = (float) springState.getDouble(Spring.KEY_DEFAULT_LENGTH);
+			Particle p1 = (Particle) nodes.get(springState.getInt(Spring.Keys.Node1.toString()));
+			Particle p2 = (Particle) nodes.get(springState.getInt(Spring.Keys.Node2.toString()));
+			float defaultLength = (float) springState.getDouble(Spring.Keys.DefaultLength.toString());
 
 			Spring spring = new Spring(p1, p2, defaultLength);
 			edges.add(spring);
@@ -81,13 +84,13 @@ public class Web extends Graph {
 		while (iterator.hasNext()) {
 			Spring spring = (Spring) iterator.next();
 			JSONObject springState = spring.toJSON();
-			springState.put(Spring.KEY_NODE1, nodes.indexOf(spring.getNode1()));
-			springState.put(Spring.KEY_NODE2, nodes.indexOf(spring.getNode2()));
+			springState.put(Spring.Keys.Node1.toString(), nodes.indexOf(spring.getNode1()));
+			springState.put(Spring.Keys.Node2.toString(), nodes.indexOf(spring.getNode2()));
 			springs.put(springState);
 		}
 
-		state.put(KEY_PARTICLES, particles);
-		state.put(KEY_SPRINGS, springs);
+		state.put(Keys.Particles.toString(), particles);
+		state.put(Keys.Springs.toString(), springs);
 
 		return state;
 	}

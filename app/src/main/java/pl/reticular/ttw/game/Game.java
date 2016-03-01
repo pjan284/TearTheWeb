@@ -43,21 +43,27 @@ import pl.reticular.ttw.utils.Vector2;
 public class Game {
 	private Context context;
 
-	private static final String KEY_WEB = "Web";
-	private static final String KEY_FINGER = "Finger";
-	private static final String KEY_SPIDERS = "Spiders";
-	private static final String KEY_LIVES_LEFT = "LivesLeft";
-	private static final String KEY_LEVEL = "Level";
-	private static final String KEY_SCORE = "Score";
+	private enum Keys {
+		Web,
+		Finger,
+		Spiders,
+		LivesLeft,
+		Level,
+		Score
+	}
 
-	public static final String MESSAGE_TYPE = "MessageType";
-	public static final String MESSAGE_DATA = "Data";
+	public enum MessageFields {
+		Type,
+		Data
+	}
 
-	public static final int MESSAGE_LIVES_LEFT = 1;
-	public static final int MESSAGE_SPIDERS_LEFT = 2;
-	public static final int MESSAGE_SCORE = 3;
-	public static final int MESSAGE_LEVEL_UP = 4;
-	public static final int MESSAGE_GAME_OVER = 5;
+	public enum MessageType {
+		LivesLeft,
+		SpidersLeft,
+		Score,
+		LevelUp,
+		GameOver
+	}
 
 	private Handler messageHandler;
 
@@ -118,22 +124,22 @@ public class Game {
 		this.context = context;
 		this.messageHandler = messageHandler;
 
-		livesLeft = json.getInt(KEY_LIVES_LEFT);
+		livesLeft = json.getInt(Keys.LivesLeft.toString());
 
 		if (isFinished()) {
 			throw new GameFinishedException();
 		}
 
-		level = json.getInt(KEY_LEVEL);
-		score = json.getInt(KEY_SCORE);
+		level = json.getInt(Keys.Level.toString());
+		score = json.getInt(Keys.Score.toString());
 
-		web = new Web(json.getJSONObject(KEY_WEB));
+		web = new Web(json.getJSONObject(Keys.Web.toString()));
 		setupWebObserver();
 
-		finger = new Finger(json.getJSONObject(KEY_FINGER));
+		finger = new Finger(json.getJSONObject(Keys.Finger.toString()));
 
 		spiders = new LinkedList<>();
-		JSONArray spidersData = json.getJSONArray(KEY_SPIDERS);
+		JSONArray spidersData = json.getJSONArray(Keys.Spiders.toString());
 		for (int i = 0; i < spidersData.length(); i++) {
 			JSONObject spiderState = spidersData.getJSONObject(i);
 			Spider spider = new Spider(web, spiderState);
@@ -154,8 +160,8 @@ public class Game {
 
 		JSONObject state = new JSONObject();
 
-		state.put(KEY_WEB, web.toJSON());
-		state.put(KEY_FINGER, finger.toJSON());
+		state.put(Keys.Web.toString(), web.toJSON());
+		state.put(Keys.Finger.toString(), finger.toJSON());
 
 		JSONArray spidersData = new JSONArray();
 
@@ -164,11 +170,11 @@ public class Game {
 			spidersData.put(spiderState);
 		}
 
-		state.put(KEY_SPIDERS, spidersData);
+		state.put(Keys.Spiders.toString(), spidersData);
 
-		state.put(KEY_LIVES_LEFT, livesLeft);
-		state.put(KEY_LEVEL, level);
-		state.put(KEY_SCORE, score);
+		state.put(Keys.LivesLeft.toString(), livesLeft);
+		state.put(Keys.Level.toString(), level);
+		state.put(Keys.Score.toString(), score);
 
 		return state;
 	}
@@ -216,8 +222,8 @@ public class Game {
 	public void messageSpidersLeft() {
 		Message msg = messageHandler.obtainMessage();
 		Bundle b = new Bundle();
-		b.putInt(MESSAGE_TYPE, MESSAGE_SPIDERS_LEFT);
-		b.putInt(MESSAGE_DATA, spiders.size());
+		b.putString(MessageFields.Type.toString(), MessageType.SpidersLeft.toString());
+		b.putInt(MessageFields.Data.toString(), spiders.size());
 		msg.setData(b);
 		messageHandler.sendMessage(msg);
 	}
@@ -225,8 +231,8 @@ public class Game {
 	public void messageLivesLeft() {
 		Message msg = messageHandler.obtainMessage();
 		Bundle b = new Bundle();
-		b.putInt(MESSAGE_TYPE, MESSAGE_LIVES_LEFT);
-		b.putInt(MESSAGE_DATA, livesLeft);
+		b.putString(MessageFields.Type.toString(), MessageType.LivesLeft.toString());
+		b.putInt(MessageFields.Data.toString(), livesLeft);
 		msg.setData(b);
 		messageHandler.sendMessage(msg);
 	}
@@ -234,8 +240,8 @@ public class Game {
 	public void messageScore() {
 		Message msg = messageHandler.obtainMessage();
 		Bundle b = new Bundle();
-		b.putInt(MESSAGE_TYPE, MESSAGE_SCORE);
-		b.putInt(MESSAGE_DATA, score);
+		b.putString(MessageFields.Type.toString(), MessageType.Score.toString());
+		b.putInt(MessageFields.Data.toString(), score);
 		msg.setData(b);
 		messageHandler.sendMessage(msg);
 	}
@@ -243,8 +249,8 @@ public class Game {
 	public void messageLevelUp() {
 		Message msg = messageHandler.obtainMessage();
 		Bundle b = new Bundle();
-		b.putInt(MESSAGE_TYPE, MESSAGE_LEVEL_UP);
-		b.putInt(MESSAGE_DATA, level);
+		b.putString(MessageFields.Type.toString(), MessageType.LevelUp.toString());
+		b.putInt(MessageFields.Data.toString(), level);
 		msg.setData(b);
 		messageHandler.sendMessage(msg);
 	}
@@ -252,8 +258,8 @@ public class Game {
 	public void messageGameOver() {
 		Message msg = messageHandler.obtainMessage();
 		Bundle b = new Bundle();
-		b.putInt(MESSAGE_TYPE, MESSAGE_GAME_OVER);
-		b.putInt(MESSAGE_DATA, score);
+		b.putString(MessageFields.Type.toString(), MessageType.GameOver.toString());
+		b.putInt(MessageFields.Data.toString(), score);
 		msg.setData(b);
 		messageHandler.sendMessage(msg);
 	}

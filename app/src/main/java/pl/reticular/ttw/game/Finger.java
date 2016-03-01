@@ -40,8 +40,10 @@ public class Finger {
 
 	private static final float poisonedTime = 3.0f;
 
-	private static final String KEY_POISONED = "Poisoned";
-	private static final String KEY_POISONED_TIME_LEFT = "PoisonedTimeLeft";
+	private enum Keys {
+		Poisoned,
+		PoisonedTimeLeft
+	}
 
 	Finger() {
 		paint = new Paint();
@@ -61,8 +63,8 @@ public class Finger {
 		paint.setStrokeWidth(3.0f);
 		radius = 0.1f;
 		pos = new Vector2();
-		poisoned = json.getBoolean(KEY_POISONED);
-		poisonedTimeLeft = (float) json.getDouble(KEY_POISONED_TIME_LEFT);
+		poisoned = json.getBoolean(Keys.Poisoned.toString());
+		poisonedTimeLeft = (float) json.getDouble(Keys.PoisonedTimeLeft.toString());
 		setVisible(false);
 		setPoisoned(false);
 	}
@@ -70,8 +72,8 @@ public class Finger {
 	public JSONObject toJSON() throws JSONException {
 		JSONObject state = new JSONObject();
 
-		state.put(KEY_POISONED, poisoned);
-		state.put(KEY_POISONED_TIME_LEFT, poisonedTimeLeft);
+		state.put(Keys.Poisoned.toString(), poisoned);
+		state.put(Keys.PoisonedTimeLeft.toString(), poisonedTimeLeft);
 
 		return state;
 	}

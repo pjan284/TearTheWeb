@@ -39,9 +39,11 @@ public class Spring extends Edge {
 	private static final float tearFactor = 3.5f;
 	private static final float tensionFactor = 0.9f;
 
-	public static final String KEY_DEFAULT_LENGTH = "DefaultLength";
-	public static final String KEY_NODE1 = "Node1";
-	public static final String KEY_NODE2 = "Node2";
+	public enum Keys {
+		DefaultLength,
+		Node1,
+		Node2
+	}
 
 	public class BrokenException extends Exception {
 	}
@@ -75,7 +77,7 @@ public class Spring extends Edge {
 	public JSONObject toJSON() throws JSONException {
 		JSONObject state = new JSONObject();
 
-		state.put(KEY_DEFAULT_LENGTH, defaultLength);
+		state.put(Keys.DefaultLength.toString(), defaultLength);
 
 		return state;
 	}

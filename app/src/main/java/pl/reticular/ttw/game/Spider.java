@@ -94,13 +94,15 @@ public class Spider {
 
 	private static Vector2 upVector = new Vector2(0.0f, 1.0f);
 
-	private static final String KEY_MODE = "Mode";
-	private static final String KEY_TARGET = "Target";
-	private static final String KEY_SPRING = "Spring";
-	private static final String KEY_SPRING_PERCENT = "SpringPercent";
-	private static final String KEY_POSITION = "Position";
-	private static final String KEY_VELOCITY = "Velocity";
-	private static final String KEY_ROTATION = "Rotation";
+	private enum Keys {
+		Mode,
+		Target,
+		Spring,
+		SpringPercent,
+		Position,
+		Velocity,
+		Rotation
+	}
 
 	public class OutException extends Exception {
 	}
@@ -127,22 +129,22 @@ public class Spider {
 	public Spider(Graph graph, JSONObject json) throws JSONException {
 		this.graph = graph;
 
-		mode = json.getInt(KEY_MODE);
+		mode = json.getInt(Keys.Mode.toString());
 		if (mode != MODE_FALLING) {
-			target = (Particle) graph.getNode(json.getInt(KEY_TARGET));
-			JSONObject springState = json.getJSONObject(KEY_SPRING);
-			Particle p1 = (Particle) graph.getNode(springState.getInt(Spring.KEY_NODE1));
-			Particle p2 = (Particle) graph.getNode(springState.getInt(Spring.KEY_NODE2));
+			target = (Particle) graph.getNode(json.getInt(Keys.Target.toString()));
+			JSONObject springState = json.getJSONObject(Keys.Spring.toString());
+			Particle p1 = (Particle) graph.getNode(springState.getInt(Spring.Keys.Node1.toString()));
+			Particle p2 = (Particle) graph.getNode(springState.getInt(Spring.Keys.Node2.toString()));
 			spring = (Spring) p1.getEdgeTo(p2);
-			springPercent = (float) json.getDouble(KEY_SPRING_PERCENT);
+			springPercent = (float) json.getDouble(Keys.SpringPercent.toString());
 			position = new Vector2();
 			velocity = new Vector2();
 		} else {
-			position = new Vector2(json.getJSONObject(KEY_POSITION));
-			velocity = new Vector2(json.getJSONObject(KEY_POSITION));
+			position = new Vector2(json.getJSONObject(Keys.Position.toString()));
+			velocity = new Vector2(json.getJSONObject(Keys.Velocity.toString()));
 		}
 
-		rotation = (float) json.getDouble(KEY_ROTATION);
+		rotation = (float) json.getDouble(Keys.Rotation.toString());
 
 		generator = new Random();
 
@@ -158,19 +160,19 @@ public class Spider {
 	public JSONObject toJSON() throws JSONException {
 		JSONObject state = new JSONObject();
 
-		state.put(KEY_MODE, mode);
+		state.put(Keys.Mode.toString(), mode);
 		if (mode != MODE_FALLING) {
-			state.put(KEY_TARGET, graph.getIndexOfNode(target));
+			state.put(Keys.Target.toString(), graph.getIndexOfNode(target));
 			JSONObject springState = spring.toJSON();
-			springState.put(Spring.KEY_NODE1, graph.getIndexOfNode(spring.getNode1()));
-			springState.put(Spring.KEY_NODE2, graph.getIndexOfNode(spring.getNode2()));
-			state.put(KEY_SPRING, springState);
-			state.put(KEY_SPRING_PERCENT, springPercent);
+			springState.put(Spring.Keys.Node1.toString(), graph.getIndexOfNode(spring.getNode1()));
+			springState.put(Spring.Keys.Node2.toString(), graph.getIndexOfNode(spring.getNode2()));
+			state.put(Keys.Spring.toString(), springState);
+			state.put(Keys.SpringPercent.toString(), springPercent);
 		} else {
-			state.put(KEY_POSITION, position.toJSON());
-			state.put(KEY_VELOCITY, velocity.toJSON());
+			state.put(Keys.Position.toString(), position.toJSON());
+			state.put(Keys.Velocity.toString(), velocity.toJSON());
 		}
-		state.put(KEY_ROTATION, rotation);
+		state.put(Keys.Rotation.toString(), rotation);
 
 		return state;
 	}

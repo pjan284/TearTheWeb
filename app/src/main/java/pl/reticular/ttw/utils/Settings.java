@@ -31,15 +31,21 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class Settings {
-	private static final String KEY_SETTINGS = "Settings";
-	private static final String KEY_LAST_GAME = "LastGame";
-	private static final String KEY_HIGH_SCORES = "HighScores";
-	private static final String KEY_DATE = "Date";
-	private static final String KEY_SCORE = "Score";
+	private static final String SETTINGS_NAME = "Settings";
+
+	private enum Keys {
+		LastGame,
+		HighScores
+	}
+
+	private enum HighScoreKeys {
+		Date,
+		Score
+	}
 
 	public static JSONObject getLastGame(Context context) {
-		SharedPreferences prefs = context.getSharedPreferences(KEY_SETTINGS, Context.MODE_PRIVATE);
-		String string = prefs.getString(KEY_LAST_GAME, "{}");
+		SharedPreferences prefs = context.getSharedPreferences(SETTINGS_NAME, Context.MODE_PRIVATE);
+		String string = prefs.getString(Keys.LastGame.toString(), "{}");
 		JSONObject json = new JSONObject();
 		try {
 			json = new JSONObject(string);
@@ -50,36 +56,36 @@ public class Settings {
 	}
 
 	public static void saveLastGame(Context context, JSONObject json) {
-		SharedPreferences prefs = context.getSharedPreferences(KEY_SETTINGS, Context.MODE_PRIVATE);
+		SharedPreferences prefs = context.getSharedPreferences(SETTINGS_NAME, Context.MODE_PRIVATE);
 
 		String string = json.toString();
 		SharedPreferences.Editor editor = prefs.edit();
-		editor.putString(KEY_LAST_GAME, string);
+		editor.putString(Keys.LastGame.toString(), string);
 		editor.commit();
 	}
 
 	public static void clearLastGame(Context context) {
-		SharedPreferences prefs = context.getSharedPreferences(KEY_SETTINGS, Context.MODE_PRIVATE);
+		SharedPreferences prefs = context.getSharedPreferences(SETTINGS_NAME, Context.MODE_PRIVATE);
 		SharedPreferences.Editor editor = prefs.edit();
-		editor.remove(KEY_LAST_GAME);
+		editor.remove(Keys.LastGame.toString());
 		editor.commit();
 	}
 
 	public static boolean hasLastGame(Context context) {
-		SharedPreferences prefs = context.getSharedPreferences(KEY_SETTINGS, Context.MODE_PRIVATE);
-		return prefs.contains(KEY_LAST_GAME);
+		SharedPreferences prefs = context.getSharedPreferences(SETTINGS_NAME, Context.MODE_PRIVATE);
+		return prefs.contains(Keys.LastGame.toString());
 	}
 
 	public static List<Pair<Long, Integer>> getHighScores(Context context) {
-		SharedPreferences prefs = context.getSharedPreferences(KEY_SETTINGS, Context.MODE_PRIVATE);
-		String string = prefs.getString(KEY_HIGH_SCORES, "[]");
+		SharedPreferences prefs = context.getSharedPreferences(SETTINGS_NAME, Context.MODE_PRIVATE);
+		String string = prefs.getString(Keys.HighScores.toString(), "[]");
 		List<Pair<Long, Integer>> list = new LinkedList<>();
 		try {
 			JSONArray array = new JSONArray(string);
 			for (int i = 0; i < array.length(); i += 1) {
 				JSONObject json = array.getJSONObject(i);
-				Long date = json.getLong(KEY_DATE);
-				Integer score = json.getInt(KEY_SCORE);
+				Long date = json.getLong(HighScoreKeys.Date.toString());
+				Integer score = json.getInt(HighScoreKeys.Score.toString());
 				list.add(new Pair<>(date, score));
 			}
 		} catch (JSONException e) {
@@ -89,15 +95,15 @@ public class Settings {
 	}
 
 	public static void saveHighScore(Context context, int score) {
-		SharedPreferences prefs = context.getSharedPreferences(KEY_SETTINGS, Context.MODE_PRIVATE);
+		SharedPreferences prefs = context.getSharedPreferences(SETTINGS_NAME, Context.MODE_PRIVATE);
 		List<Pair<Long, Integer>> list = getHighScores(context);
 		list.add(new Pair<>(System.currentTimeMillis(), score));
 		JSONArray array = new JSONArray();
 		try {
 			for (Pair<Long, Integer> item : list) {
 				JSONObject json = new JSONObject();
-				json.put(KEY_DATE, item.first);
-				json.put(KEY_SCORE, item.second);
+				json.put(HighScoreKeys.Date.toString(), item.first);
+				json.put(HighScoreKeys.Score.toString(), item.second);
 				array.put(json);
 			}
 		} catch (JSONException e) {
@@ -105,15 +111,15 @@ public class Settings {
 		}
 
 		SharedPreferences.Editor editor = prefs.edit();
-		editor.putString(KEY_HIGH_SCORES, array.toString());
+		editor.putString(Keys.HighScores.toString(), array.toString());
 		editor.commit();
 	}
 
 	public static void clearHighScores(Context context) {
-		SharedPreferences prefs = context.getSharedPreferences(KEY_SETTINGS, Context.MODE_PRIVATE);
+		SharedPreferences prefs = context.getSharedPreferences(SETTINGS_NAME, Context.MODE_PRIVATE);
 		JSONArray array = new JSONArray();
 		SharedPreferences.Editor editor = prefs.edit();
-		editor.putString(KEY_HIGH_SCORES, array.toString());
+		editor.putString(Keys.HighScores.toString(), array.toString());
 		editor.commit();
 	}
 }
