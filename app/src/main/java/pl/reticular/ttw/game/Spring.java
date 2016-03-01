@@ -40,29 +40,14 @@ public class Spring extends Edge {
 	private static final float tensionFactor = 0.9f;
 
 	public enum Keys {
-		DefaultLength,
-		Node1,
-		Node2
+		DefaultLength
 	}
 
 	public class BrokenException extends Exception {
 	}
 
-	public Spring(Particle particle1, Particle particle2, float length) {
-		super(particle1, particle2);
-		this.particle1 = (Particle) node1;
-		this.particle2 = (Particle) node2;
-
-		defaultLength = length;
-
-		paint = new Paint();
-		paint.setAntiAlias(true);
-		paint.setStrokeWidth(3.0f);
-		paint.setColor(Color.GRAY);
-	}
-
-	public Spring(Particle particle1, Particle particle2) {
-		super(particle1, particle2);
+	public Spring(Web web, Particle particle1, Particle particle2) {
+		super(web, particle1, particle2);
 		this.particle1 = (Particle) node1;
 		this.particle2 = (Particle) node2;
 
@@ -74,8 +59,21 @@ public class Spring extends Edge {
 		paint.setColor(Color.GRAY);
 	}
 
+	public Spring(Web web, JSONObject json) throws JSONException {
+		super(web, json);
+		this.particle1 = (Particle) node1;
+		this.particle2 = (Particle) node2;
+
+		defaultLength = (float) json.getDouble(Keys.DefaultLength.toString());
+
+		paint = new Paint();
+		paint.setAntiAlias(true);
+		paint.setStrokeWidth(3.0f);
+		paint.setColor(Color.GRAY);
+	}
+
 	public JSONObject toJSON() throws JSONException {
-		JSONObject state = new JSONObject();
+		JSONObject state = super.toJSON();
 
 		state.put(Keys.DefaultLength.toString(), defaultLength);
 

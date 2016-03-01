@@ -54,7 +54,7 @@ public class Particle extends Node {
 	}
 
 	public Particle(JSONObject json) throws JSONException {
-		super();
+		super(json);
 		pos = new Vector2(json.getJSONObject(Keys.Pos.toString()));
 		prevPos = new Vector2(json.getJSONObject(Keys.PrevPos.toString()));
 		pinned = json.getBoolean(Keys.Pinned.toString());
@@ -64,8 +64,9 @@ public class Particle extends Node {
 		resetColor();
 	}
 
+	@Override
 	public JSONObject toJSON() throws JSONException {
-		JSONObject state = new JSONObject();
+		JSONObject state = super.toJSON();
 
 		state.put(Keys.Pos.toString(), pos.toJSON());
 		state.put(Keys.PrevPos.toString(), prevPos.toJSON());

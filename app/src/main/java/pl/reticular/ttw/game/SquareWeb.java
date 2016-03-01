@@ -40,12 +40,12 @@ public class SquareWeb extends Web {
 				insert(p);
 
 				if (x != 0) {
-					Spring spring = new Spring(p, (Particle) nodes.get(nodes.size() - 2));
+					Spring spring = new Spring(this, p, (Particle) nodes.get(nodes.size() - 2));
 					insert(spring);
 				}
 
 				if (y != 0) {
-					Spring spring = new Spring(p, (Particle) nodes.get(x + (y - 1) * (width + 1)));
+					Spring spring = new Spring(this, p, (Particle) nodes.get(x + (y - 1) * (width + 1)));
 					insert(spring);
 				}
 			}

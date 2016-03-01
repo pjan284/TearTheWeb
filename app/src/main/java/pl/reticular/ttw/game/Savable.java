@@ -1,4 +1,4 @@
-package pl.reticular.ttw.game.graph;
+package pl.reticular.ttw.game;
 
 /*
  * Copyright (C) 2016 Piotr Jankowski
@@ -22,45 +22,6 @@ package pl.reticular.ttw.game.graph;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.LinkedList;
-
-import pl.reticular.ttw.game.Savable;
-
-public class Node implements Savable {
-	protected LinkedList<Edge> edges;
-
-	public Node() {
-		edges = new LinkedList<>();
-	}
-
-	public Node(JSONObject json) throws JSONException {
-		edges = new LinkedList<>();
-	}
-
-
-	@Override
-	public JSONObject toJSON() throws JSONException {
-		return new JSONObject();
-	}
-
-	public void addEdge(Edge edge) {
-		edges.add(edge);
-	}
-
-	public void removeEdge(Edge edge) {
-		edges.remove(edge);
-	}
-
-	public LinkedList<Edge> getEdges() {
-		return edges;
-	}
-
-	public Edge getEdgeTo(Node v2) {
-		for (Edge e : edges) {
-			if (e.next(this) == v2) {
-				return e;
-			}
-		}
-		return null;
-	}
+public interface Savable {
+	JSONObject toJSON() throws JSONException;
 }

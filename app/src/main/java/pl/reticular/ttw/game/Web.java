@@ -21,7 +21,6 @@ package pl.reticular.ttw.game;
 
 import android.graphics.Canvas;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -34,11 +33,6 @@ import pl.reticular.ttw.utils.Vector2;
 
 public class Web extends Graph {
 
-	private enum Keys {
-		Particles,
-		Springs
-	}
-
 	protected final int physicsAccuracy = 1;
 
 	Web() {
@@ -46,53 +40,21 @@ public class Web extends Graph {
 	}
 
 	Web(JSONObject json) throws JSONException {
-		super();
+		super(json);
+	}
 
-		JSONArray particles = json.getJSONArray(Keys.Particles.toString());
-		JSONArray springs = json.getJSONArray(Keys.Springs.toString());
+	@Override
+	protected Node recreateNode(JSONObject state) throws JSONException {
+		return new Particle(state);
+	}
 
-		for (int i = 0; i < particles.length(); i++) {
-			JSONObject particleState = particles.getJSONObject(i);
-			Particle part = new Particle(particleState);
-			nodes.add(part);
-		}
-
-		for (int i = 0; i < springs.length(); i++) {
-			JSONObject springState = springs.getJSONObject(i);
-			Particle p1 = (Particle) nodes.get(springState.getInt(Spring.Keys.Node1.toString()));
-			Particle p2 = (Particle) nodes.get(springState.getInt(Spring.Keys.Node2.toString()));
-			float defaultLength = (float) springState.getDouble(Spring.Keys.DefaultLength.toString());
-
-			Spring spring = new Spring(p1, p2, defaultLength);
-			edges.add(spring);
-		}
+	@Override
+	protected Edge recreateEdge(JSONObject state) throws JSONException {
+		return new Spring(this, state);
 	}
 
 	public JSONObject toJSON() throws JSONException {
-		JSONObject state = new JSONObject();
-
-		JSONArray particles = new JSONArray();
-		JSONArray springs = new JSONArray();
-
-		Iterator iterator = nodes.iterator();
-		while (iterator.hasNext()) {
-			JSONObject particleState = ((Particle) iterator.next()).toJSON();
-			particles.put(particleState);
-		}
-
-		iterator = edges.iterator();
-		while (iterator.hasNext()) {
-			Spring spring = (Spring) iterator.next();
-			JSONObject springState = spring.toJSON();
-			springState.put(Spring.Keys.Node1.toString(), nodes.indexOf(spring.getNode1()));
-			springState.put(Spring.Keys.Node2.toString(), nodes.indexOf(spring.getNode2()));
-			springs.put(springState);
-		}
-
-		state.put(Keys.Particles.toString(), particles);
-		state.put(Keys.Springs.toString(), springs);
-
-		return state;
+		return super.toJSON();
 	}
 
 	protected void addChain(Particle part1, Particle part2, int segments) {
@@ -105,13 +67,13 @@ public class Web extends Graph {
 			Particle part = new Particle(p.X, p.Y, false);
 			nodes.add(part);
 
-			Spring spring = new Spring(start, part);
+			Spring spring = new Spring(this, start, part);
 			edges.add(spring);
 
 			start = part;
 		}
 
-		Spring spring = new Spring(start, end);
+		Spring spring = new Spring(this, start, end);
 		edges.add(spring);
 	}
 

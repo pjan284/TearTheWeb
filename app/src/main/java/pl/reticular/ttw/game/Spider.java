@@ -97,7 +97,7 @@ public class Spider {
 	private enum Keys {
 		Mode,
 		Target,
-		Spring,
+		PrevTarget,
 		SpringPercent,
 		Position,
 		Velocity,
@@ -132,10 +132,8 @@ public class Spider {
 		mode = json.getInt(Keys.Mode.toString());
 		if (mode != MODE_FALLING) {
 			target = (Particle) graph.getNode(json.getInt(Keys.Target.toString()));
-			JSONObject springState = json.getJSONObject(Keys.Spring.toString());
-			Particle p1 = (Particle) graph.getNode(springState.getInt(Spring.Keys.Node1.toString()));
-			Particle p2 = (Particle) graph.getNode(springState.getInt(Spring.Keys.Node2.toString()));
-			spring = (Spring) p1.getEdgeTo(p2);
+			Node prevTarget = graph.getNode(json.getInt(Keys.PrevTarget.toString()));
+			spring = (Spring) prevTarget.getEdgeTo(target);
 			springPercent = (float) json.getDouble(Keys.SpringPercent.toString());
 			position = new Vector2();
 			velocity = new Vector2();
@@ -163,10 +161,7 @@ public class Spider {
 		state.put(Keys.Mode.toString(), mode);
 		if (mode != MODE_FALLING) {
 			state.put(Keys.Target.toString(), graph.getIndexOfNode(target));
-			JSONObject springState = spring.toJSON();
-			springState.put(Spring.Keys.Node1.toString(), graph.getIndexOfNode(spring.getNode1()));
-			springState.put(Spring.Keys.Node2.toString(), graph.getIndexOfNode(spring.getNode2()));
-			state.put(Keys.Spring.toString(), springState);
+			state.put(Keys.PrevTarget.toString(), graph.getIndexOfNode(spring.next(target)));
 			state.put(Keys.SpringPercent.toString(), springPercent);
 		} else {
 			state.put(Keys.Position.toString(), position.toJSON());

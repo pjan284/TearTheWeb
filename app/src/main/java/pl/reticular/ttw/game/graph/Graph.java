@@ -21,20 +21,78 @@ package pl.reticular.ttw.game.graph;
 
 import android.util.Log;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 
-public abstract class Graph {
+import pl.reticular.ttw.game.Savable;
+
+public abstract class Graph implements Savable {
 	protected ArrayList<Node> nodes;
 	protected ArrayList<Edge> edges;
 
 	private GraphObserver observer;
 
+	private enum Keys {
+		Nodes,
+		Edges
+	}
+
 	public Graph() {
 		nodes = new ArrayList<>();
 		edges = new ArrayList<>();
 	}
+
+	public Graph(JSONObject json) throws JSONException {
+		nodes = new ArrayList<>();
+		edges = new ArrayList<>();
+
+		JSONArray nodeStates = json.getJSONArray(Keys.Nodes.toString());
+		JSONArray edgeStates = json.getJSONArray(Keys.Edges.toString());
+
+		for (int i = 0; i < nodeStates.length(); i++) {
+			JSONObject nodeState = nodeStates.getJSONObject(i);
+			Node node = recreateNode(nodeState);
+			nodes.add(node);
+		}
+
+		for (int i = 0; i < edgeStates.length(); i++) {
+			JSONObject edgeState = edgeStates.getJSONObject(i);
+			Edge edge = recreateEdge(edgeState);
+			edges.add(edge);
+		}
+	}
+
+	@Override
+	public JSONObject toJSON() throws JSONException {
+		JSONObject state = new JSONObject();
+
+		JSONArray nodeStates = new JSONArray();
+		JSONArray edgeStates = new JSONArray();
+
+		for (Node node : nodes) {
+			JSONObject nodeState = node.toJSON();
+			nodeStates.put(nodeState);
+		}
+
+		for (Edge edge : edges) {
+			JSONObject edgeState = edge.toJSON();
+			edgeStates.put(edgeState);
+		}
+
+		state.put(Keys.Nodes.toString(), nodeStates);
+		state.put(Keys.Edges.toString(), edgeStates);
+
+		return state;
+	}
+
+	protected abstract Node recreateNode(JSONObject state) throws JSONException;
+
+	protected abstract Edge recreateEdge(JSONObject state) throws JSONException;
 
 	public void setObserver(GraphObserver go) {
 		observer = go;

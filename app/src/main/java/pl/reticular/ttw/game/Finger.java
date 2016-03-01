@@ -30,7 +30,7 @@ import java.util.LinkedList;
 
 import pl.reticular.ttw.utils.Vector2;
 
-public class Finger {
+public class Finger implements Savable {
 	private Paint paint;
 	private float radius;
 	private Vector2 pos;
