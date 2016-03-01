@@ -25,7 +25,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.HashMap;
 import java.util.Iterator;
 
 import pl.reticular.ttw.game.graph.Edge;
@@ -49,23 +48,48 @@ public class Web extends Graph {
 		JSONArray particles = json.getJSONArray(KEY_PARTICLES);
 		JSONArray springs = json.getJSONArray(KEY_SPRINGS);
 
-		HashMap<Integer, Particle> oldNumberMap = new HashMap<>();
 		for (int i = 0; i < particles.length(); i++) {
 			JSONObject particleState = particles.getJSONObject(i);
 			Particle part = new Particle(particleState);
-			oldNumberMap.put(part.getNumber(), part);
 			nodes.add(part);
 		}
 
 		for (int i = 0; i < springs.length(); i++) {
 			JSONObject springState = springs.getJSONObject(i);
-			Particle p1 = oldNumberMap.get(springState.getInt(Spring.KEY_NODE1));
-			Particle p2 = oldNumberMap.get(springState.getInt(Spring.KEY_NODE2));
+			Particle p1 = (Particle) nodes.get(springState.getInt(Spring.KEY_NODE1));
+			Particle p2 = (Particle) nodes.get(springState.getInt(Spring.KEY_NODE2));
 			float defaultLength = (float) springState.getDouble(Spring.KEY_DEFAULT_LENGTH);
 
 			Spring spring = new Spring(p1, p2, defaultLength);
 			edges.add(spring);
 		}
+	}
+
+	public JSONObject toJSON() throws JSONException {
+		JSONObject state = new JSONObject();
+
+		JSONArray particles = new JSONArray();
+		JSONArray springs = new JSONArray();
+
+		Iterator iterator = nodes.iterator();
+		while (iterator.hasNext()) {
+			JSONObject particleState = ((Particle) iterator.next()).toJSON();
+			particles.put(particleState);
+		}
+
+		iterator = edges.iterator();
+		while (iterator.hasNext()) {
+			Spring spring = (Spring) iterator.next();
+			JSONObject springState = spring.toJSON();
+			springState.put(Spring.KEY_NODE1, nodes.indexOf(spring.getNode1()));
+			springState.put(Spring.KEY_NODE2, nodes.indexOf(spring.getNode2()));
+			springs.put(springState);
+		}
+
+		state.put(KEY_PARTICLES, particles);
+		state.put(KEY_SPRINGS, springs);
+
+		return state;
 	}
 
 	protected void addChain(Particle part1, Particle part2, int segments) {
@@ -138,29 +162,5 @@ public class Web extends Graph {
 		}
 
 		return chosen;
-	}
-
-	public JSONObject toJSON() throws JSONException {
-		JSONObject state = new JSONObject();
-
-		JSONArray particles = new JSONArray();
-		JSONArray springs = new JSONArray();
-
-		Iterator iterator = nodes.iterator();
-		while (iterator.hasNext()) {
-			JSONObject particleState = ((Particle) iterator.next()).toJSON();
-			particles.put(particleState);
-		}
-
-		iterator = edges.iterator();
-		while (iterator.hasNext()) {
-			JSONObject springState = ((Spring) iterator.next()).toJSON();
-			springs.put(springState);
-		}
-
-		state.put(KEY_PARTICLES, particles);
-		state.put(KEY_SPRINGS, springs);
-
-		return state;
 	}
 }

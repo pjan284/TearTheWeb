@@ -72,7 +72,7 @@ public abstract class Graph {
 	public void print() {
 		Log.d(getClass().getName(), "Graph:");
 		for (int i = 0; i < nodes.size(); i++) {
-			String str = ((Integer) nodes.get(i).getNumber()).toString() + ": " + printList(nodes.get(i));
+			String str = i + ": " + printList(nodes.get(i));
 			Log.d(getClass().getName(), str);
 		}
 	}
@@ -80,7 +80,7 @@ public abstract class Graph {
 	private String printList(Node node) {
 		String str = "";
 		for (Edge e : node.edges) {
-			str += ((Integer) e.next(node).getNumber()).toString();
+			str += nodes.indexOf(e.next(node));
 			str += ", ";
 		}
 		return str;
@@ -135,5 +135,13 @@ public abstract class Graph {
 			}
 		}
 		return null;
+	}
+
+	public int getIndexOfNode(Node node) {
+		return nodes.indexOf(node);
+	}
+
+	public Node getNode(int index) {
+		return nodes.get(index);
 	}
 }

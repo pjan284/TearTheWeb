@@ -36,7 +36,6 @@ public class Particle extends Node {
 
 	private static final float dampingFactor = 0.99f;
 
-	private static final String KEY_NUMBER = "Number";
 	private static final String KEY_POS = "Pos";
 	private static final String KEY_PREV_POS = "PrevPos";
 	private static final String KEY_PINNED = "Pinned";
@@ -54,7 +53,6 @@ public class Particle extends Node {
 
 	public Particle(JSONObject json) throws JSONException {
 		super();
-		setNumber(json.getInt(KEY_NUMBER));
 		pos = new Vector2(json.getJSONObject(KEY_POS));
 		prevPos = new Vector2(json.getJSONObject(KEY_PREV_POS));
 		pinned = json.getBoolean(KEY_PINNED);
@@ -67,7 +65,6 @@ public class Particle extends Node {
 	public JSONObject toJSON() throws JSONException {
 		JSONObject state = new JSONObject();
 
-		state.put(KEY_NUMBER, getNumber());
 		state.put(KEY_POS, pos.toJSON());
 		state.put(KEY_PREV_POS, prevPos.toJSON());
 		state.put(KEY_PINNED, pinned);

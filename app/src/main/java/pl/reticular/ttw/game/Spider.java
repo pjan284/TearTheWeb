@@ -26,6 +26,9 @@ import android.graphics.RectF;
 import android.support.v4.util.Pair;
 import android.util.Log;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.LinkedList;
 import java.util.Random;
 
@@ -78,7 +81,7 @@ public class Spider {
 
 	private LinkedList<Node> path;
 
-	private int fingerDetectDistance;
+	private static final int fingerDetectDistance = 15;
 
 	private Vector2 position;
 	private Vector2 velocity;
@@ -91,10 +94,16 @@ public class Spider {
 
 	private static Vector2 upVector = new Vector2(0.0f, 1.0f);
 
+	private static final String KEY_MODE = "Mode";
+	private static final String KEY_TARGET = "Target";
+	private static final String KEY_SPRING = "Spring";
+	private static final String KEY_SPRING_PERCENT = "SpringPercent";
+	private static final String KEY_POSITION = "Position";
+	private static final String KEY_VELOCITY = "Velocity";
+	private static final String KEY_ROTATION = "Rotation";
+
 	public class OutException extends Exception {
 	}
-
-	;
 
 	public Spider(Graph graph) {
 		this.graph = graph;
@@ -104,18 +113,72 @@ public class Spider {
 
 		mode = MODE_RANDOM;
 
-		paint = new Paint();
-		paint.setColor(Color.rgb(255, 0, 0));
-		paint.setStrokeWidth(2.0f);
-
 		generator = new Random();
 
 		path = null;
 
-		fingerDetectDistance = 10;
-
 		position = new Vector2();
+		velocity = new Vector2();
 		rotation = 0;
+
+		createDisplayData();
+	}
+
+	public Spider(Graph graph, JSONObject json) throws JSONException {
+		this.graph = graph;
+
+		mode = json.getInt(KEY_MODE);
+		if (mode != MODE_FALLING) {
+			target = (Particle) graph.getNode(json.getInt(KEY_TARGET));
+			JSONObject springState = json.getJSONObject(KEY_SPRING);
+			Particle p1 = (Particle) graph.getNode(springState.getInt(Spring.KEY_NODE1));
+			Particle p2 = (Particle) graph.getNode(springState.getInt(Spring.KEY_NODE2));
+			spring = (Spring) p1.getEdgeTo(p2);
+			springPercent = (float) json.getDouble(KEY_SPRING_PERCENT);
+			position = new Vector2();
+			velocity = new Vector2();
+		} else {
+			position = new Vector2(json.getJSONObject(KEY_POSITION));
+			velocity = new Vector2(json.getJSONObject(KEY_POSITION));
+		}
+
+		rotation = (float) json.getDouble(KEY_ROTATION);
+
+		generator = new Random();
+
+		// TODO
+		path = null;
+		if (mode == MODE_ATTACK) {
+			mode = MODE_RANDOM;
+		}
+
+		createDisplayData();
+	}
+
+	public JSONObject toJSON() throws JSONException {
+		JSONObject state = new JSONObject();
+
+		state.put(KEY_MODE, mode);
+		if (mode != MODE_FALLING) {
+			state.put(KEY_TARGET, graph.getIndexOfNode(target));
+			JSONObject springState = spring.toJSON();
+			springState.put(Spring.KEY_NODE1, graph.getIndexOfNode(spring.getNode1()));
+			springState.put(Spring.KEY_NODE2, graph.getIndexOfNode(spring.getNode2()));
+			state.put(KEY_SPRING, springState);
+			state.put(KEY_SPRING_PERCENT, springPercent);
+		} else {
+			state.put(KEY_POSITION, position.toJSON());
+			state.put(KEY_VELOCITY, velocity.toJSON());
+		}
+		state.put(KEY_ROTATION, rotation);
+
+		return state;
+	}
+
+	private void createDisplayData() {
+		paint = new Paint();
+		paint.setColor(Color.rgb(255, 0, 0));
+		paint.setStrokeWidth(2.0f);
 
 		legs = new float[]{
 				0, 0, 8, -8,

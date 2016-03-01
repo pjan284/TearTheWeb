@@ -29,6 +29,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.view.MotionEvent;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -45,7 +46,6 @@ public class Game {
 	private static final String KEY_WEB = "Web";
 	private static final String KEY_FINGER = "Finger";
 	private static final String KEY_SPIDERS = "Spiders";
-	private static final String KEY_SPIDERS_NUM = "SpidersNum";
 	private static final String KEY_LIVES_LEFT = "LivesLeft";
 	private static final String KEY_LEVEL = "Level";
 	private static final String KEY_SCORE = "Score";
@@ -133,9 +133,11 @@ public class Game {
 		finger = new Finger(json.getJSONObject(KEY_FINGER));
 
 		spiders = new LinkedList<>();
-		int numSpiders = json.getInt(KEY_SPIDERS_NUM);
-		for (int i = 0; i < numSpiders; i++) {
-			spiders.add(new Spider(web));
+		JSONArray spidersData = json.getJSONArray(KEY_SPIDERS);
+		for (int i = 0; i < spidersData.length(); i++) {
+			JSONObject spiderState = spidersData.getJSONObject(i);
+			Spider spider = new Spider(web, spiderState);
+			spiders.add(spider);
 		}
 
 		messageLivesLeft();
@@ -154,7 +156,16 @@ public class Game {
 
 		state.put(KEY_WEB, web.toJSON());
 		state.put(KEY_FINGER, finger.toJSON());
-		state.put(KEY_SPIDERS_NUM, spiders.size());
+
+		JSONArray spidersData = new JSONArray();
+
+		for (Spider spider : spiders) {
+			JSONObject spiderState = spider.toJSON();
+			spidersData.put(spiderState);
+		}
+
+		state.put(KEY_SPIDERS, spidersData);
+
 		state.put(KEY_LIVES_LEFT, livesLeft);
 		state.put(KEY_LEVEL, level);
 		state.put(KEY_SCORE, score);

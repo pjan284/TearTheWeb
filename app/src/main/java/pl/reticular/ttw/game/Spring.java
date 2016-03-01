@@ -46,8 +46,6 @@ public class Spring extends Edge {
 	public class BrokenException extends Exception {
 	}
 
-	;
-
 	public Spring(Particle particle1, Particle particle2, float length) {
 		super(particle1, particle2);
 		this.particle1 = (Particle) node1;
@@ -77,8 +75,6 @@ public class Spring extends Edge {
 	public JSONObject toJSON() throws JSONException {
 		JSONObject state = new JSONObject();
 
-		state.put(KEY_NODE1, node1.getNumber());
-		state.put(KEY_NODE2, node2.getNumber());
 		state.put(KEY_DEFAULT_LENGTH, defaultLength);
 
 		return state;

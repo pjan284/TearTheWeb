@@ -19,8 +19,6 @@ package pl.reticular.ttw.game.graph;
  * along with Tear The Web. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import android.util.Log;
-
 public class Edge {
 	protected Node node1, node2;
 
@@ -46,13 +44,5 @@ public class Edge {
 
 	public Node getNode2() {
 		return node2;
-	}
-
-	public void print() {
-		String str = "between: ";
-		str += ((Integer) node1.getNumber()).toString();
-		str += " and: ";
-		str += ((Integer) node2.getNumber()).toString();
-		Log.d(getClass().getName(), str);
 	}
 }

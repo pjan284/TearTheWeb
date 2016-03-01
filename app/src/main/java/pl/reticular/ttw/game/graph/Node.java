@@ -23,21 +23,9 @@ import java.util.LinkedList;
 
 public class Node {
 	protected LinkedList<Edge> edges;
-	private int number;
-	private static int lastNumber = 0;
 
 	public Node() {
 		edges = new LinkedList<>();
-		number = ++lastNumber;
-	}
-
-	public int getNumber() {
-		return number;
-	}
-
-	public void setNumber(int n) {
-		number = n;
-		lastNumber = Math.max(number, lastNumber);
 	}
 
 	public void addEdge(Edge edge) {
