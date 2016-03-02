@@ -38,7 +38,7 @@ public class Finger implements Savable {
 	private boolean poisoned;
 	private float poisonedTimeLeft;
 
-	private static final float poisonedTime = 3.0f;
+	private static final float poisonedTime = 1.0f;
 
 	private enum Keys {
 		Poisoned,
