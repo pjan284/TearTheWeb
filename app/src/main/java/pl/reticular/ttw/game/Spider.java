@@ -38,7 +38,7 @@ import pl.reticular.ttw.game.graph.Node;
 import pl.reticular.ttw.utils.Modulo;
 import pl.reticular.ttw.utils.Vector2;
 
-public class Spider {
+public class Spider implements Savable {
 	private int mode;
 	private Graph graph;
 
@@ -82,6 +82,8 @@ public class Spider {
 	private LinkedList<Node> path;
 
 	private static final int fingerDetectDistance = 15;
+
+	private float imageScale;
 
 	private Vector2 position;
 	private Vector2 velocity;
@@ -210,6 +212,8 @@ public class Spider {
 
 		body = new RectF(-4.0f, 12.0f, 4.0f, 0.0f);
 		head = new RectF(-3.0f, 0.0f, 3.0f, -8.0f);
+
+		imageScale = 0.003f;
 	}
 
 	private Pair<Particle, Spring> nextTargetAtRandom() {
@@ -262,6 +266,8 @@ public class Spider {
 		canvas.save();
 		canvas.translate(x, y);
 		canvas.rotate(-rotation, 0, 0);
+		float s = imageScale * scale;
+		canvas.scale(s, s);
 
 		//canvas.drawCircle(0, 0, 4.0f, paint);
 
