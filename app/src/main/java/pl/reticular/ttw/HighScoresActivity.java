@@ -24,6 +24,7 @@ import android.support.v4.util.Pair;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -31,10 +32,8 @@ import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
-import java.text.DateFormat;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -44,15 +43,17 @@ import pl.reticular.ttw.utils.Settings;
 
 public class HighScoresActivity extends AppCompatActivity {
 
-	private static final String COLUMN_DATE = "Date";
-	private static final String COLUMN_SCORE = "Score";
+	private enum Columns {
+		Date,
+		Score
+	}
 
 	private Map<String, String> createRowData(Long date, Integer score) {
 		Map<String, String> map = new HashMap<>();
-		Date d = new Date(date);
-		DateFormat dateFormat = android.text.format.DateFormat.getDateFormat(getApplicationContext());
-		map.put(COLUMN_DATE, dateFormat.format(d));
-		map.put(COLUMN_SCORE, String.format("%d", score));
+		long now = System.currentTimeMillis();
+		String timeSpan = (String) DateUtils.getRelativeTimeSpanString(date, now, DateUtils.SECOND_IN_MILLIS, DateUtils.FORMAT_ABBREV_RELATIVE);
+		map.put(Columns.Date.toString(), timeSpan);
+		map.put(Columns.Score.toString(), String.format("%d", score));
 		return map;
 	}
 
@@ -70,11 +71,10 @@ public class HighScoresActivity extends AppCompatActivity {
 
 		list.setEmptyView(noGames);
 
-		String[] fromColumns = {COLUMN_DATE, COLUMN_SCORE};
+		String[] fromColumns = {Columns.Date.toString(), Columns.Score.toString()};
 		int[] toViews = {R.id.text_date, R.id.text_score};
 
 		List<Pair<Long, Integer>> highScores = Settings.getHighScores(this);
-
 
 		Collections.sort(highScores, new Comparator<Pair<Long, Integer>>() {
 			@Override

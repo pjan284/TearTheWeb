@@ -11,7 +11,6 @@
         android:id="@+id/toolbar_high_scores"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:layout_marginBottom="20dp"
         android:background="?attr/colorPrimary"
         android:elevation="4dp" />
 
