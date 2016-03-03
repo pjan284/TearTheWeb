@@ -20,6 +20,7 @@ package pl.reticular.ttw.game;
  */
 
 import android.graphics.Canvas;
+import android.graphics.RectF;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -85,7 +86,8 @@ public class Web extends Graph {
 		addChain(part1, part2, (int) Math.ceil(length / segmentLength));
 	}
 
-	protected void update(float dt, Vector2 gravity) {
+	protected void update(float dt, Vector2 gravity, RectF gameArea) {
+		// Resolve springs and remove broken
 		for (int i = 0; i < physicsAccuracy; i++) {
 			Iterator<Edge> it = edges.iterator();
 			while (it.hasNext()) {
@@ -99,8 +101,19 @@ public class Web extends Graph {
 			}
 		}
 
+		// Update nodes (and springs) positions
 		for (Node node : nodes) {
 			((Particle) node).update(dt, gravity);
+		}
+
+		// Remove springs that fallen out of game area
+		Iterator<Edge> it = edges.iterator();
+		while (it.hasNext()) {
+			Edge edge = it.next();
+			if (((Spring) edge).isOut(gameArea)) {
+				onRemoveEdge(edge);
+				it.remove();
+			}
 		}
 	}
 

@@ -318,7 +318,7 @@ public class Game {
 
 	public void update(float dt) {
 
-		web.update(dt, gravity);
+		web.update(dt, gravity, gameArea);
 
 		Iterator<Spider> it = spiders.iterator();
 		while (it.hasNext()) {

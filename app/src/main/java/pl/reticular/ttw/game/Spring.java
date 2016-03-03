@@ -22,6 +22,7 @@ package pl.reticular.ttw.game;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.RectF;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -164,6 +165,10 @@ public class Spring extends Edge {
 			Vector2 v2 = Vector2.sub(p2, p1);
 			return Vector2.angle(v2, base);
 		}
+	}
+
+	public boolean isOut(RectF area) {
+		return !(particle1.getPos().isInBounds(area) || particle2.getPos().isInBounds(area));
 	}
 
 	public Particle getParticle1() {
