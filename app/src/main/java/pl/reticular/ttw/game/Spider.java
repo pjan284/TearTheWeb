@@ -354,15 +354,15 @@ public class Spider implements Savable {
 		}
 	}
 
-	public void onEdgeRemoved(Edge edge) {
+	public void onSpringUnAvailable(Spring unAvailableSpring) {
 		switch (mode) {
 			case MODE_RANDOM:
-				if (edge == spring) {
+				if (unAvailableSpring == spring) {
 					switchToFalling();
 				}
 				break;
 			case MODE_ATTACK:
-				if (edge == spring) {
+				if (unAvailableSpring == spring) {
 					switchToFalling();
 				} else {
 					//We need to change path, as old may be invalid

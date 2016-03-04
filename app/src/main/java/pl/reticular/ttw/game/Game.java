@@ -36,8 +36,6 @@ import org.json.JSONObject;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-import pl.reticular.ttw.game.graph.Edge;
-import pl.reticular.ttw.game.graph.GraphObserver;
 import pl.reticular.ttw.utils.Vector2;
 
 public class Game {
@@ -185,16 +183,23 @@ public class Game {
 	}
 
 	private void setupWebObserver() {
-		web.setObserver(new GraphObserver() {
+		web.setObserver(new WebObserver() {
 			@Override
-			public void onEdgeRemoved(Edge edge) {
+			public void onSpringBroken(Spring spring) {
 				if (!isFinished()) {
 					setParticleToMove(null);
 					addScore(1);
 				}
 
 				for (Spider spider : spiders) {
-					spider.onEdgeRemoved(edge);
+					spider.onSpringUnAvailable(spring);
+				}
+			}
+
+			@Override
+			public void onSpringOut(Spring spring) {
+				for (Spider spider : spiders) {
+					spider.onSpringUnAvailable(spring);
 				}
 			}
 		});

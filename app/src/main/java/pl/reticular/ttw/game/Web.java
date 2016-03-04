@@ -36,6 +36,8 @@ public class Web extends Graph {
 
 	protected final int physicsAccuracy = 1;
 
+	private WebObserver observer;
+
 	Web() {
 		super();
 	}
@@ -91,11 +93,12 @@ public class Web extends Graph {
 		for (int i = 0; i < physicsAccuracy; i++) {
 			Iterator<Edge> it = edges.iterator();
 			while (it.hasNext()) {
-				Edge edge = it.next();
+				Spring spring = (Spring) it.next();
 				try {
-					((Spring) edge).resolveVerlet();
+					spring.resolveVerlet();
 				} catch (Spring.BrokenException e) {
-					onRemoveEdge(edge);
+					observer.onSpringBroken(spring);
+					onRemoveEdge(spring);
 					it.remove();
 				}
 			}
@@ -109,9 +112,10 @@ public class Web extends Graph {
 		// Remove springs that fallen out of game area
 		Iterator<Edge> it = edges.iterator();
 		while (it.hasNext()) {
-			Edge edge = it.next();
-			if (((Spring) edge).isOut(gameArea)) {
-				onRemoveEdge(edge);
+			Spring spring = (Spring) it.next();
+			if (spring.isOut(gameArea)) {
+				observer.onSpringOut(spring);
+				onRemoveEdge(spring);
 				it.remove();
 			}
 		}
@@ -140,5 +144,9 @@ public class Web extends Graph {
 		}
 
 		return chosen;
+	}
+
+	public void setObserver(WebObserver wo) {
+		observer = wo;
 	}
 }

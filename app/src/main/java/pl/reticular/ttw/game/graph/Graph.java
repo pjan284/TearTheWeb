@@ -35,8 +35,6 @@ public abstract class Graph implements Savable {
 	protected ArrayList<Node> nodes;
 	protected ArrayList<Edge> edges;
 
-	private GraphObserver observer;
-
 	private enum Keys {
 		Nodes,
 		Edges
@@ -94,10 +92,6 @@ public abstract class Graph implements Savable {
 
 	protected abstract Edge recreateEdge(JSONObject state) throws JSONException;
 
-	public void setObserver(GraphObserver go) {
-		observer = go;
-	}
-
 	public void onRemoveEdge(Edge edge) {
 		Node n1 = edge.getNode1();
 		n1.removeEdge(edge);
@@ -110,8 +104,6 @@ public abstract class Graph implements Savable {
 		if (n2.getEdges().size() == 0) {
 			nodes.remove(n2);
 		}
-
-		observer.onEdgeRemoved(edge);
 	}
 
 	public Edge getRandomEdge() {

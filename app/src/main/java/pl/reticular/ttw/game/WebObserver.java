@@ -1,4 +1,4 @@
-package pl.reticular.ttw.game.graph;
+package pl.reticular.ttw.game;
 
 /*
  * Copyright (C) 2016 Piotr Jankowski
@@ -19,6 +19,8 @@ package pl.reticular.ttw.game.graph;
  * along with Tear The Web. If not, see <http://www.gnu.org/licenses/>.
  */
 
-public interface GraphObserver {
-	void onEdgeRemoved(Edge edge);
+public interface WebObserver {
+	void onSpringBroken(Spring spring);
+
+	void onSpringOut(Spring spring);
 }
