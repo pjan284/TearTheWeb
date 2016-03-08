@@ -19,12 +19,10 @@ package pl.reticular.ttw;
  * along with Tear The Web. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
 import android.view.MenuItem;
 
 public class HelpActivity extends AppCompatActivity {
@@ -44,26 +42,9 @@ public class HelpActivity extends AppCompatActivity {
 		}
 	}
 
-	private void onAbout() {
-		Intent intent = new Intent(this, AboutActivity.class);
-		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-		startActivity(intent);
-	}
-
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.menu_help, menu);
-		return true;
-	}
-
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
-			case R.id.action_about:
-				onAbout();
-				break;
 			// Respond to the action bar's Up/Home button
 			case android.R.id.home:
 				onBackPressed();

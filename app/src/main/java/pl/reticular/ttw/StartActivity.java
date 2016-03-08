@@ -22,7 +22,9 @@ package pl.reticular.ttw;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.PopupMenu;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -43,7 +45,7 @@ public class StartActivity extends AppCompatActivity {
 		Button newGameButton = (Button) findViewById(R.id.button_new_game);
 		continueButton = (Button) findViewById(R.id.button_continue);
 		Button highScoresButton = (Button) findViewById(R.id.button_high_scores);
-		ImageButton helpButton = (ImageButton) findViewById(R.id.button_help);
+		ImageButton moreButton = (ImageButton) findViewById(R.id.button_start_more);
 
 		newGameButton.setOnClickListener(new View.OnClickListener() {
 			@Override
@@ -66,10 +68,10 @@ public class StartActivity extends AppCompatActivity {
 			}
 		});
 
-		helpButton.setOnClickListener(new View.OnClickListener() {
+		moreButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				onHelp();
+				showMoreMenu(v);
 			}
 		});
 	}
@@ -82,8 +84,30 @@ public class StartActivity extends AppCompatActivity {
 		continueButton.setEnabled(Settings.hasLastGame(this));
 	}
 
-	private void onNewGame() {
-		Intent intent = new Intent(this, GameActivity.class);
+	private void showMoreMenu(View v) {
+		PopupMenu popup = new PopupMenu(this, v);
+		popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+			@Override
+			public boolean onMenuItemClick(MenuItem item) {
+				switch (item.getItemId()) {
+					case R.id.action_about:
+						onAbout();
+						return true;
+					case R.id.action_help:
+						onHelp();
+						return true;
+					default:
+						return false;
+				}
+			}
+		});
+		popup.inflate(R.menu.menu_start_more);
+		popup.show();
+
+	}
+
+	private void onAbout() {
+		Intent intent = new Intent(this, AboutActivity.class);
 		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
 		startActivity(intent);
@@ -99,6 +123,13 @@ public class StartActivity extends AppCompatActivity {
 		startActivity(intent);
 	}
 
+	private void onHelp() {
+		Intent intent = new Intent(this, HelpActivity.class);
+		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+		startActivity(intent);
+	}
+
 	private void onHighScores() {
 		Intent intent = new Intent(this, HighScoresActivity.class);
 		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -106,8 +137,8 @@ public class StartActivity extends AppCompatActivity {
 		startActivity(intent);
 	}
 
-	private void onHelp() {
-		Intent intent = new Intent(this, HelpActivity.class);
+	private void onNewGame() {
+		Intent intent = new Intent(this, GameActivity.class);
 		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
 		startActivity(intent);

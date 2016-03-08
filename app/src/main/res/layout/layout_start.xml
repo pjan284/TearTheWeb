@@ -14,15 +14,16 @@
         android:layout_weight="1">
 
         <ImageButton
-            android:id="@+id/button_help"
-            android:layout_width="?attr/actionBarSize"
-            android:layout_height="?attr/actionBarSize"
+            android:id="@+id/button_start_more"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
+            android:layout_marginTop="5dp"
             android:background="@null"
-            android:contentDescription="@string/start_help"
-            android:src="@drawable/ic_action_help" />
+            android:contentDescription="@string/start_more"
+            android:src="@drawable/ic_action_overflow" />
 
         <TextView
             android:id="@+id/text_tear_the_web"

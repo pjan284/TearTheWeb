@@ -10,7 +10,7 @@
     <string name="start_new_game">&gt; New Game &lt;</string>
     <string name="start_continue_game">&gt; Continue &lt;</string>
     <string name="start_high_scores">&gt; High Scores &lt;</string>
-    <string name="start_help">&gt; Help &lt;</string>
+    <string name="start_more">more</string>
     <string name="game_spiders">spiders: %d</string>
     <string name="game_lives">lives: %d</string>
     <string name="game_level">level: %d</string>
@@ -18,7 +18,6 @@
     <string name="game_game_over">Game Over!</string>
     <string name="high_scores_action_clear">clear</string>
     <string name="high_scores_no_games">Empty!</string>
-    <string name="help_action_about">About</string>
     <string name="help_how_to_play">How to play:</string>
     <string name="help_text_1">Swipe over the web threads to grab and pull them.</string>
     <string name="help_text_2">Beware of spiders! Their bites are venomous!</string>

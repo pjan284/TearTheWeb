@@ -1,4 +1,5 @@
-<manifest package="pl.reticular.ttw"
+<manifest
+    package="pl.reticular.ttw"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application
@@ -7,7 +8,7 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        
+
         <activity
             android:name=".StartActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
@@ -18,7 +19,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        
+
         <activity
             android:name=".GameActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
@@ -28,19 +29,19 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".StartActivity" />
         </activity>
-        
+
         <activity
             android:name=".HighScoresActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/title_activity_high_scores"
             android:screenOrientation="portrait" />
-        
+
         <activity
             android:name=".HelpActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/title_activity_help"
             android:screenOrientation="portrait" />
-        
+
         <activity
             android:name=".AboutActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
