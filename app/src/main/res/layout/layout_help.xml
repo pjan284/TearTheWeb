@@ -25,6 +25,7 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
+            android:gravity="center_horizontal"
             android:orientation="vertical">
 
             <TextView
@@ -32,6 +33,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
                 android:layout_marginTop="10dp"
+                android:gravity="center_horizontal"
                 android:text="@string/help_how_to_play"
                 android:textAppearance="?android:attr/textAppearanceLarge" />
 
@@ -40,6 +42,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
                 android:layout_marginTop="10dp"
+                android:gravity="center_horizontal"
                 android:text="@string/help_text_1"
                 android:textAppearance="?android:attr/textAppearanceMedium" />
 
@@ -48,6 +51,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
                 android:layout_marginTop="10dp"
+                android:gravity="center_horizontal"
                 android:text="@string/help_text_2"
                 android:textAppearance="?android:attr/textAppearanceMedium" />
 
@@ -56,6 +60,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
                 android:layout_marginTop="10dp"
+                android:gravity="center_horizontal"
                 android:text="@string/help_text_3"
                 android:textAppearance="?android:attr/textAppearanceMedium" />
 
@@ -64,6 +69,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
                 android:layout_marginTop="10dp"
+                android:gravity="center_horizontal"
                 android:text="@string/help_text_4"
                 android:textAppearance="?android:attr/textAppearanceMedium" />
 
@@ -72,6 +78,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
                 android:layout_marginTop="10dp"
+                android:gravity="center_horizontal"
                 android:text="@string/help_text_5"
                 android:textAppearance="?android:attr/textAppearanceMedium" />
         </LinearLayout>
