@@ -17,6 +17,8 @@
     <string name="game_score">score: %d</string>
     <string name="game_game_over">Game Over!</string>
     <string name="high_scores_action_clear">clear</string>
+    <string name="high_scores_score">Score</string>
+    <string name="high_scores_date">Date</string>
     <string name="high_scores_no_games">Empty!</string>
     <string name="help_how_to_play">How to play:</string>
     <string name="help_text_1">Swipe over the web threads to grab and pull them.</string>

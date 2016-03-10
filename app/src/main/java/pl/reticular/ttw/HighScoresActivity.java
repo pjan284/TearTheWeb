@@ -19,6 +19,7 @@ package pl.reticular.ttw;
  * along with Tear The Web. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.util.Pair;
 import android.support.v7.app.ActionBar;
@@ -28,6 +29,8 @@ import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
@@ -65,11 +68,27 @@ public class HighScoresActivity extends AppCompatActivity {
 		return list;
 	}
 
+	private View createHeader(ViewGroup listView) {
+		View header = getLayoutInflater().inflate(R.layout.layout_high_score, listView, false);
+		TextView dateText = (TextView) header.findViewById(R.id.text_date);
+		TextView scoreText = (TextView) header.findViewById(R.id.text_score);
+
+		dateText.setTextColor(Color.WHITE);
+		scoreText.setTextColor(Color.WHITE);
+
+		dateText.setText(R.string.high_scores_date);
+		scoreText.setText(R.string.high_scores_score);
+
+		return header;
+	}
+
 	private void setupList() {
 		ListView list = (ListView) findViewById(R.id.list_high_scores);
 		TextView noGames = (TextView) findViewById(R.id.text_no_games);
 
 		list.setEmptyView(noGames);
+
+		list.addHeaderView(createHeader(list));
 
 		String[] fromColumns = {Columns.Date.toString(), Columns.Score.toString()};
 		int[] toViews = {R.id.text_date, R.id.text_score};
