@@ -74,7 +74,7 @@ public class HighScoresActivity extends AppCompatActivity {
 		String[] fromColumns = {Columns.Date.toString(), Columns.Score.toString()};
 		int[] toViews = {R.id.text_date, R.id.text_score};
 
-		List<Pair<Long, Integer>> highScores = Settings.getHighScores(this);
+		List<Pair<Long, Integer>> highScores = Settings.getInstance().getHighScores(this);
 
 		Collections.sort(highScores, new Comparator<Pair<Long, Integer>>() {
 			@Override
@@ -130,7 +130,7 @@ public class HighScoresActivity extends AppCompatActivity {
 		switch (item.getItemId()) {
 			// Respond to the clear button
 			case R.id.action_clear:
-				Settings.clearHighScores(this);
+				Settings.getInstance().clearHighScores(this);
 				setupList();
 				break;
 			// Respond to the action bar's Up/Home button

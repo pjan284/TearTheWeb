@@ -75,16 +75,18 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
 			continueGame = bundle.getBoolean(KEY_CONTINUE_GAME, false);
 		}
 
+		Settings settings = Settings.getInstance();
+
 		// try to load last played game
 		Game lastGame = null;
-		if (Settings.hasLastGame(this)) {
+		if (settings.hasLastGame(this)) {
 			try {
-				lastGame = new Game(this, new MessageHandler(this), Settings.getLastGame(this));
+				lastGame = new Game(this, new MessageHandler(this), settings.getLastGame(this));
 			} catch (JSONException e) {
 				e.printStackTrace();
-				Settings.clearLastGame(this);
+				settings.clearLastGame(this);
 			} catch (Game.GameFinishedException e) {
-				Settings.clearLastGame(this);
+				settings.clearLastGame(this);
 			}
 		}
 
@@ -97,9 +99,9 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
 			}
 		} else {
 			if (lastGame != null) {
-				Settings.saveHighScore(this, lastGame.getScore());
+				settings.saveHighScore(this, lastGame.getScore());
 			}
-			Settings.clearLastGame(this);
+			settings.clearLastGame(this);
 			game = new Game(this, new MessageHandler(this));
 		}
 
@@ -130,19 +132,21 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
 			sensorAvailable = false;
 		}
 
+		Settings settings = Settings.getInstance();
+
 		gameSurfaceView.getThread().pause();
 
 		if (!gameSurfaceView.getGame().isFinished()) {
 			try {
-				Settings.saveLastGame(this, gameSurfaceView.getGame().toJSON());
+				settings.saveLastGame(this, gameSurfaceView.getGame().toJSON());
 			} catch (JSONException e) {
 				e.printStackTrace();
-				Settings.clearLastGame(this);
+				settings.clearLastGame(this);
 			} catch (Game.GameFinishedException e) {
-				Settings.clearLastGame(this);
+				settings.clearLastGame(this);
 			}
 		} else {
-			Settings.clearLastGame(this);
+			settings.clearLastGame(this);
 		}
 	}
 
@@ -205,8 +209,10 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
 		toast.setGravity(Gravity.CENTER, 0, 0);
 		toast.show();
 
-		Settings.clearLastGame(this);
-		Settings.saveHighScore(this, score);
+		Settings settings = Settings.getInstance();
+
+		settings.clearLastGame(this);
+		settings.saveHighScore(this, score);
 
 		Handler handler = new Handler();
 		handler.postDelayed(new Runnable() {

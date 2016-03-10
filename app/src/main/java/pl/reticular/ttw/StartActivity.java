@@ -81,7 +81,7 @@ public class StartActivity extends AppCompatActivity {
 		super.onResume();
 		Log.i(getClass().getName(), "onResume");
 
-		continueButton.setEnabled(Settings.hasLastGame(this));
+		continueButton.setEnabled(Settings.getInstance().hasLastGame(this));
 	}
 
 	private void showMoreMenu(View v) {

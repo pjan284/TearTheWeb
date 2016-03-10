@@ -31,6 +31,15 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class Settings {
+	private static Settings instance = new Settings();
+
+	public static Settings getInstance() {
+		return instance;
+	}
+
+	private Settings() {
+	}
+
 	private static final String SETTINGS_NAME = "Settings";
 
 	private enum Keys {
@@ -43,7 +52,7 @@ public class Settings {
 		Score
 	}
 
-	public static JSONObject getLastGame(Context context) {
+	public JSONObject getLastGame(Context context) {
 		SharedPreferences prefs = context.getSharedPreferences(SETTINGS_NAME, Context.MODE_PRIVATE);
 		String string = prefs.getString(Keys.LastGame.toString(), "{}");
 		JSONObject json = new JSONObject();
@@ -55,7 +64,7 @@ public class Settings {
 		return json;
 	}
 
-	public static void saveLastGame(Context context, JSONObject json) {
+	public void saveLastGame(Context context, JSONObject json) {
 		SharedPreferences prefs = context.getSharedPreferences(SETTINGS_NAME, Context.MODE_PRIVATE);
 
 		String string = json.toString();
@@ -64,19 +73,19 @@ public class Settings {
 		editor.commit();
 	}
 
-	public static void clearLastGame(Context context) {
+	public void clearLastGame(Context context) {
 		SharedPreferences prefs = context.getSharedPreferences(SETTINGS_NAME, Context.MODE_PRIVATE);
 		SharedPreferences.Editor editor = prefs.edit();
 		editor.remove(Keys.LastGame.toString());
 		editor.commit();
 	}
 
-	public static boolean hasLastGame(Context context) {
+	public boolean hasLastGame(Context context) {
 		SharedPreferences prefs = context.getSharedPreferences(SETTINGS_NAME, Context.MODE_PRIVATE);
 		return prefs.contains(Keys.LastGame.toString());
 	}
 
-	public static List<Pair<Long, Integer>> getHighScores(Context context) {
+	public List<Pair<Long, Integer>> getHighScores(Context context) {
 		SharedPreferences prefs = context.getSharedPreferences(SETTINGS_NAME, Context.MODE_PRIVATE);
 		String string = prefs.getString(Keys.HighScores.toString(), "[]");
 		List<Pair<Long, Integer>> list = new LinkedList<>();
@@ -94,7 +103,7 @@ public class Settings {
 		return list;
 	}
 
-	public static void saveHighScore(Context context, int score) {
+	public void saveHighScore(Context context, int score) {
 		SharedPreferences prefs = context.getSharedPreferences(SETTINGS_NAME, Context.MODE_PRIVATE);
 		List<Pair<Long, Integer>> list = getHighScores(context);
 		list.add(new Pair<>(System.currentTimeMillis(), score));
@@ -115,7 +124,7 @@ public class Settings {
 		editor.commit();
 	}
 
-	public static void clearHighScores(Context context) {
+	public void clearHighScores(Context context) {
 		SharedPreferences prefs = context.getSharedPreferences(SETTINGS_NAME, Context.MODE_PRIVATE);
 		JSONArray array = new JSONArray();
 		SharedPreferences.Editor editor = prefs.edit();
