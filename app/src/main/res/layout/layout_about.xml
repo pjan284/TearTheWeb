@@ -71,13 +71,6 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:text="@string/about_license" />
-
-            <Button
-                android:id="@+id/button_source"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:text="@string/about_source" />
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

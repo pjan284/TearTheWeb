@@ -60,28 +60,10 @@ public class AboutActivity extends AppCompatActivity {
 				showLicense();
 			}
 		});
-
-		Button sourceButton = (Button) findViewById(R.id.button_source);
-		sourceButton.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				showSource();
-			}
-		});
 	}
 
 	private void showLicense() {
 		String url = "https://www.gnu.org/licenses/gpl.html";
-		Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-		try {
-			startActivity(intent);
-		} catch (ActivityNotFoundException e) {
-			Log.e(getClass().getName(), "cannot open browser");
-		}
-	}
-
-	private void showSource() {
-		String url = "https://github.com/pjan284/TearTheWeb";
 		Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
 		try {
 			startActivity(intent);
