@@ -19,9 +19,9 @@ package pl.reticular.ttw;
  * along with Tear The Web. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.support.v4.util.Pair;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -31,93 +31,33 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import pl.reticular.ttw.utils.PrefsHelper;
+import pl.reticular.ttw.utils.PrefsListHelper;
+import pl.reticular.ttw.utils.Result;
 import pl.reticular.ttw.utils.Settings;
 
-public class HighScoresActivity extends AppCompatActivity {
+public class HighScoresActivity extends AppCompatActivity
+		implements SharedPreferences.OnSharedPreferenceChangeListener {
 
 	private enum Columns {
 		Date,
 		Score
 	}
 
-	private Map<String, String> createRowData(Long date, Integer score) {
-		Map<String, String> map = new HashMap<>();
-		long now = System.currentTimeMillis();
-		String timeSpan = (String) DateUtils.getRelativeTimeSpanString(date, now, DateUtils.SECOND_IN_MILLIS, DateUtils.FORMAT_ABBREV_RELATIVE);
-		map.put(Columns.Date.toString(), timeSpan);
-		map.put(Columns.Score.toString(), String.format("%d", score));
-		return map;
-	}
+	private SharedPreferences preferences;
 
-	private List<Map<String, String>> createData(List<Pair<Long, Integer>> highScores) {
-		List<Map<String, String>> list = new LinkedList<>();
-		for (Pair<Long, Integer> pair : highScores) {
-			list.add(createRowData(pair.first, pair.second));
-		}
-		return list;
-	}
-
-	private View createHeader(ViewGroup listView) {
-		View header = getLayoutInflater().inflate(R.layout.layout_high_score, listView, false);
-		TextView dateText = (TextView) header.findViewById(R.id.text_date);
-		TextView scoreText = (TextView) header.findViewById(R.id.text_score);
-
-		dateText.setTextColor(Color.WHITE);
-		scoreText.setTextColor(Color.WHITE);
-
-		dateText.setText(R.string.high_scores_date);
-		scoreText.setText(R.string.high_scores_score);
-
-		return header;
-	}
-
-	private void setupList() {
-		ListView list = (ListView) findViewById(R.id.list_high_scores);
-		TextView noGames = (TextView) findViewById(R.id.text_no_games);
-
-		list.setEmptyView(noGames);
-
-		list.addHeaderView(createHeader(list));
-
-		String[] fromColumns = {Columns.Date.toString(), Columns.Score.toString()};
-		int[] toViews = {R.id.text_date, R.id.text_score};
-
-		List<Pair<Long, Integer>> highScores = Settings.getInstance().getHighScores(this);
-
-		Collections.sort(highScores, new Comparator<Pair<Long, Integer>>() {
-			@Override
-			public int compare(Pair<Long, Integer> lhs, Pair<Long, Integer> rhs) {
-				int diff = rhs.second - lhs.second;
-				if (diff == 0) {
-					long diff2 = rhs.first - lhs.first;
-					if (diff2 == 0) {
-						return 0;
-					} else if (diff2 < 0) {
-						return -1;
-					} else {
-						return 1;
-					}
-				} else {
-					return diff;
-				}
-			}
-		});
-
-		SimpleAdapter adapter = new SimpleAdapter(this, createData(highScores), R.layout.layout_high_score, fromColumns, toViews);
-
-		list.setAdapter(adapter);
-	}
+	private ListView listView;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -134,7 +74,16 @@ public class HighScoresActivity extends AppCompatActivity {
 			actionBar.setDisplayHomeAsUpEnabled(true);
 		}
 
-		setupList();
+		listView = (ListView) findViewById(R.id.list_high_scores);
+		TextView noGames = (TextView) findViewById(R.id.text_no_games);
+
+		listView.setEmptyView(noGames);
+
+		listView.addHeaderView(createHeader(listView));
+
+		preferences = getSharedPreferences(Settings.SETTINGS_NAME, 0);
+
+		listView.setAdapter(createAdapter());
 	}
 
 	@Override
@@ -145,12 +94,28 @@ public class HighScoresActivity extends AppCompatActivity {
 	}
 
 	@Override
+	protected void onStart() {
+		super.onStart();
+		Log.i(getClass().getName(), "onStart");
+
+		preferences.registerOnSharedPreferenceChangeListener(this);
+	}
+
+	@Override
+	protected void onStop() {
+		super.onStop();
+		Log.i(getClass().getName(), "onStop");
+
+		preferences.unregisterOnSharedPreferenceChangeListener(this);
+	}
+
+	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 			// Respond to the clear button
 			case R.id.action_clear:
-				Settings.getInstance().clearHighScores(this);
-				setupList();
+				PrefsHelper.remove(preferences, Settings.Keys.HighScores.toString());
+				// we will be notified when it's done
 				break;
 			// Respond to the action bar's Up/Home button
 			case android.R.id.home:
@@ -159,5 +124,57 @@ public class HighScoresActivity extends AppCompatActivity {
 		}
 
 		return super.onOptionsItemSelected(item);
+	}
+
+	@Override
+	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+		if (Settings.Keys.valueOf(key) == Settings.Keys.HighScores) {
+			listView.setAdapter(createAdapter());
+		}
+	}
+
+	private Map<String, String> createRowData(Long date, Integer score) {
+		Map<String, String> map = new HashMap<>();
+		long now = System.currentTimeMillis();
+		String timeSpan = (String) DateUtils.getRelativeTimeSpanString(date, now, DateUtils.SECOND_IN_MILLIS, DateUtils.FORMAT_ABBREV_RELATIVE);
+		map.put(Columns.Date.toString(), timeSpan);
+		map.put(Columns.Score.toString(), String.format("%d", score));
+		return map;
+	}
+
+	private List<Map<String, String>> createData() {
+		PrefsListHelper<Result> helper = new PrefsListHelper<>(new Result.ResultFactory());
+		List<Result> highScores = helper.getList(preferences, Settings.Keys.HighScores.toString());
+
+		Collections.sort(highScores);
+
+		List<Map<String, String>> list = new LinkedList<>();
+		for (Result result : highScores) {
+			list.add(createRowData(result.getDate(), result.getScore()));
+		}
+		return list;
+	}
+
+	private ListAdapter createAdapter() {
+		List<Map<String, String>> adapterData = createData();
+
+		String[] fromColumns = {Columns.Date.toString(), Columns.Score.toString()};
+		int[] toViews = {R.id.text_date, R.id.text_score};
+
+		return new SimpleAdapter(this, adapterData, R.layout.layout_high_score, fromColumns, toViews);
+	}
+
+	private View createHeader(ViewGroup listView) {
+		View header = getLayoutInflater().inflate(R.layout.layout_high_score, listView, false);
+		TextView dateText = (TextView) header.findViewById(R.id.text_date);
+		TextView scoreText = (TextView) header.findViewById(R.id.text_score);
+
+		dateText.setTextColor(Color.WHITE);
+		scoreText.setTextColor(Color.WHITE);
+
+		dateText.setText(R.string.high_scores_date);
+		scoreText.setText(R.string.high_scores_score);
+
+		return header;
 	}
 }

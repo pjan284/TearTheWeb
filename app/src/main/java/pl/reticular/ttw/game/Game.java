@@ -36,9 +36,10 @@ import org.json.JSONObject;
 import java.util.Iterator;
 import java.util.LinkedList;
 
+import pl.reticular.ttw.utils.Savable;
 import pl.reticular.ttw.utils.Vector2;
 
-public class Game {
+public class Game implements Savable {
 	private Context context;
 
 	private enum Keys {
@@ -64,9 +65,6 @@ public class Game {
 	}
 
 	private Handler messageHandler;
-
-	public class GameFinishedException extends Exception {
-	}
 
 	private int canvasHeight = 1;
 	private int canvasWidth = 1;
@@ -118,15 +116,11 @@ public class Game {
 		gravity = new Vector2(0.0f, 1.0f);
 	}
 
-	public Game(Context context, Handler messageHandler, JSONObject json) throws JSONException, GameFinishedException {
+	public Game(Context context, Handler messageHandler, JSONObject json) throws JSONException {
 		this.context = context;
 		this.messageHandler = messageHandler;
 
 		livesLeft = json.getInt(Keys.LivesLeft.toString());
-
-		if (isFinished()) {
-			throw new GameFinishedException();
-		}
 
 		level = json.getInt(Keys.Level.toString());
 		score = json.getInt(Keys.Score.toString());
@@ -151,10 +145,8 @@ public class Game {
 		gravity = new Vector2(0.0f, 1.0f);
 	}
 
-	public JSONObject toJSON() throws JSONException, GameFinishedException {
-		if (isFinished()) {
-			throw new GameFinishedException();
-		}
+	@Override
+	public JSONObject toJSON() throws JSONException {
 
 		JSONObject state = new JSONObject();
 

@@ -36,6 +36,7 @@ import pl.reticular.ttw.game.graph.Edge;
 import pl.reticular.ttw.game.graph.Graph;
 import pl.reticular.ttw.game.graph.Node;
 import pl.reticular.ttw.utils.Modulo;
+import pl.reticular.ttw.utils.Savable;
 import pl.reticular.ttw.utils.Vector2;
 
 public class Spider implements Savable {

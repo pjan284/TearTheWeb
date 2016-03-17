@@ -28,6 +28,7 @@ import org.json.JSONObject;
 
 import java.util.LinkedList;
 
+import pl.reticular.ttw.utils.Savable;
 import pl.reticular.ttw.utils.Vector2;
 
 public class Finger implements Savable {

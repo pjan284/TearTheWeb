@@ -24,7 +24,7 @@ import org.json.JSONObject;
 
 import java.util.LinkedList;
 
-import pl.reticular.ttw.game.Savable;
+import pl.reticular.ttw.utils.Savable;
 
 public class Node implements Savable {
 	protected LinkedList<Edge> edges;

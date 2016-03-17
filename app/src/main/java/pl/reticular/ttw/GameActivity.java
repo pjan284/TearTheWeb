@@ -20,6 +20,7 @@ package pl.reticular.ttw;
  */
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -34,11 +35,16 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.lang.ref.WeakReference;
+import java.util.List;
 
 import pl.reticular.ttw.game.Game;
 import pl.reticular.ttw.game.display.GameSurfaceView;
+import pl.reticular.ttw.utils.PrefsHelper;
+import pl.reticular.ttw.utils.PrefsListHelper;
+import pl.reticular.ttw.utils.Result;
 import pl.reticular.ttw.utils.Settings;
 
 public class GameActivity extends AppCompatActivity implements SensorEventListener {
@@ -52,6 +58,10 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
 	private boolean sensorAvailable;
 
 	public static final String KEY_CONTINUE_GAME = "ContinueGame";
+
+	private SharedPreferences preferences;
+
+	Handler handler;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -69,43 +79,36 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
 		topLeftText = (TextView) findViewById(R.id.text_top_left);
 		topRightText = (TextView) findViewById(R.id.text_top_right);
 
-		Bundle bundle = getIntent().getExtras();
-		Boolean continueGame = false;
-		if (bundle != null) {
-			continueGame = bundle.getBoolean(KEY_CONTINUE_GAME, false);
-		}
+		preferences = getSharedPreferences(Settings.SETTINGS_NAME, 0);
 
-		Settings settings = Settings.getInstance();
+		// load last played game
+		Game lastGame = loadLastGame();
 
-		// try to load last played game
-		Game lastGame = null;
-		if (settings.hasLastGame(this)) {
-			try {
-				lastGame = new Game(this, new MessageHandler(this), settings.getLastGame(this));
-			} catch (JSONException e) {
-				e.printStackTrace();
-				settings.clearLastGame(this);
-			} catch (Game.GameFinishedException e) {
-				settings.clearLastGame(this);
+		// determine if last game shall be continued
+		boolean continueGame = false;
+		if (savedInstanceState != null) {
+			continueGame = (lastGame != null) && savedInstanceState.getBoolean(KEY_CONTINUE_GAME, false);
+		} else {
+			Bundle bundle = getIntent().getExtras();
+			if (bundle != null) {
+				continueGame = (lastGame != null) && bundle.getBoolean(KEY_CONTINUE_GAME, false);
 			}
 		}
 
-		Game game;
 		if (continueGame) {
-			if (lastGame != null) {
-				game = lastGame;
-			} else {
-				game = new Game(this, new MessageHandler(this));
-			}
+			// last game will be played
+			gameSurfaceView.setGame(lastGame);
 		} else {
 			if (lastGame != null) {
-				settings.saveHighScore(this, lastGame.getScore());
+				saveHighScore(lastGame.getScore());
 			}
-			settings.clearLastGame(this);
-			game = new Game(this, new MessageHandler(this));
+
+			//create new game
+			Game newGame = new Game(this, new MessageHandler(this));
+			gameSurfaceView.setGame(newGame);
 		}
 
-		gameSurfaceView.setGame(game);
+		handler = new Handler();
 	}
 
 	@Override
@@ -132,29 +135,64 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
 			sensorAvailable = false;
 		}
 
-		Settings settings = Settings.getInstance();
-
 		gameSurfaceView.getThread().pause();
-
-		if (!gameSurfaceView.getGame().isFinished()) {
-			try {
-				settings.saveLastGame(this, gameSurfaceView.getGame().toJSON());
-			} catch (JSONException e) {
-				e.printStackTrace();
-				settings.clearLastGame(this);
-			} catch (Game.GameFinishedException e) {
-				settings.clearLastGame(this);
-			}
-		} else {
-			settings.clearLastGame(this);
-		}
 	}
 
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		outState.putBoolean(KEY_CONTINUE_GAME, true);
+	}
+
+	@Override
 	protected void onStop() {
 		super.onStop();
 		Log.i(getClass().getName(), "onStop");
 
-		finish();
+		Game game = gameSurfaceView.getGame();
+		if (game.isFinished()) {
+			finish();
+		} else {
+			saveLastGame(game);
+		}
+
+		handler.removeCallbacksAndMessages(null);
+	}
+
+	private void saveLastGame(Game game) {
+		try {
+			String data = game.toJSON().toString();
+			PrefsHelper.putString(preferences, Settings.Keys.LastGame.toString(), data);
+		} catch (JSONException e) {
+			clearLastGameData();
+		}
+	}
+
+	private void saveHighScore(int score) {
+		// clear last game data
+		clearLastGameData();
+
+		// but preserve score
+		PrefsListHelper<Result> helper = new PrefsListHelper<>(new Result.ResultFactory());
+		List<Result> highScores = helper.getList(preferences, Settings.Keys.HighScores.toString());
+		highScores.add(new Result(score, System.currentTimeMillis()));
+		helper.putList(preferences, Settings.Keys.HighScores.toString(), highScores);
+	}
+
+	private void clearLastGameData() {
+		PrefsHelper.remove(preferences, Settings.Keys.LastGame.toString());
+	}
+
+	private Game loadLastGame() {
+		if (preferences.contains(Settings.Keys.LastGame.toString())) {
+			try {
+				String data = preferences.getString(Settings.Keys.LastGame.toString(), "{}");
+				JSONObject lastGameData = new JSONObject(data);
+				return new Game(this, new MessageHandler(this), lastGameData);
+			} catch (JSONException e) {
+				clearLastGameData();
+			}
+		}
+		return null;
 	}
 
 	private static class MessageHandler extends Handler {
@@ -209,12 +247,8 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
 		toast.setGravity(Gravity.CENTER, 0, 0);
 		toast.show();
 
-		Settings settings = Settings.getInstance();
+		saveHighScore(score);
 
-		settings.clearLastGame(this);
-		settings.saveHighScore(this, score);
-
-		Handler handler = new Handler();
 		handler.postDelayed(new Runnable() {
 			@Override
 			public void run() {
@@ -233,8 +267,6 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
 
 	private void launchHighScores() {
 		Intent intent = new Intent(this, HighScoresActivity.class);
-		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
 		startActivity(intent);
 	}
 

@@ -22,7 +22,7 @@ package pl.reticular.ttw.game.graph;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import pl.reticular.ttw.game.Savable;
+import pl.reticular.ttw.utils.Savable;
 
 public class Edge implements Savable {
 	private Graph graph;

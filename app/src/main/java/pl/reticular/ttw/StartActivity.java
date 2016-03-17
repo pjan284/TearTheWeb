@@ -20,6 +20,7 @@ package pl.reticular.ttw;
  */
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.PopupMenu;
@@ -31,9 +32,12 @@ import android.widget.ImageButton;
 
 import pl.reticular.ttw.utils.Settings;
 
-public class StartActivity extends AppCompatActivity {
+public class StartActivity extends AppCompatActivity
+		implements SharedPreferences.OnSharedPreferenceChangeListener {
 
 	private Button continueButton;
+
+	private SharedPreferences preferences;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -74,14 +78,25 @@ public class StartActivity extends AppCompatActivity {
 				showMoreMenu(v);
 			}
 		});
+
+		preferences = getSharedPreferences(Settings.SETTINGS_NAME, 0);
+		continueButton.setEnabled(preferences.contains(Settings.Keys.LastGame.toString()));
 	}
 
 	@Override
-	protected void onResume() {
-		super.onResume();
-		Log.i(getClass().getName(), "onResume");
+	protected void onStart() {
+		super.onStart();
+		Log.i(getClass().getName(), "onStart");
 
-		continueButton.setEnabled(Settings.getInstance().hasLastGame(this));
+		preferences.registerOnSharedPreferenceChangeListener(this);
+	}
+
+	@Override
+	protected void onStop() {
+		super.onStop();
+		Log.i(getClass().getName(), "onStop");
+
+		preferences.unregisterOnSharedPreferenceChangeListener(this);
 	}
 
 	private void showMoreMenu(View v) {
@@ -108,15 +123,12 @@ public class StartActivity extends AppCompatActivity {
 
 	private void onAbout() {
 		Intent intent = new Intent(this, AboutActivity.class);
-		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+
 		startActivity(intent);
 	}
 
 	private void onContinue() {
 		Intent intent = new Intent(this, GameActivity.class);
-		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
 		intent.putExtra(GameActivity.KEY_CONTINUE_GAME, true);
 
@@ -125,22 +137,26 @@ public class StartActivity extends AppCompatActivity {
 
 	private void onHelp() {
 		Intent intent = new Intent(this, HelpActivity.class);
-		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+
 		startActivity(intent);
 	}
 
 	private void onHighScores() {
 		Intent intent = new Intent(this, HighScoresActivity.class);
-		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+
 		startActivity(intent);
 	}
 
 	private void onNewGame() {
 		Intent intent = new Intent(this, GameActivity.class);
-		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+		
 		startActivity(intent);
+	}
+
+	@Override
+	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+		if (Settings.Keys.valueOf(key) == Settings.Keys.LastGame) {
+			continueButton.setEnabled(preferences.contains(Settings.Keys.LastGame.toString()));
+		}
 	}
 }

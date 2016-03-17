@@ -1,4 +1,4 @@
-package pl.reticular.ttw.game;
+package pl.reticular.ttw.utils;
 
 /*
  * Copyright (C) 2016 Piotr Jankowski
@@ -19,9 +19,18 @@ package pl.reticular.ttw.game;
  * along with Tear The Web. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import android.content.SharedPreferences;
 
-public interface Savable {
-	JSONObject toJSON() throws JSONException;
+public class PrefsHelper {
+	public static void remove(SharedPreferences prefs, String key) {
+		SharedPreferences.Editor editor = prefs.edit();
+		editor.remove(key);
+		editor.apply();
+	}
+
+	public static void putString(SharedPreferences prefs, String key, String value) {
+		SharedPreferences.Editor editor = prefs.edit();
+		editor.putString(key, value);
+		editor.apply();
+	}
 }

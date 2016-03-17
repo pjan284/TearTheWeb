@@ -29,7 +29,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 
-import pl.reticular.ttw.game.Savable;
+import pl.reticular.ttw.utils.Savable;
 
 public abstract class Graph implements Savable {
 	protected ArrayList<Node> nodes;

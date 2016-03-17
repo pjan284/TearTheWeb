@@ -112,8 +112,8 @@ public class Spring extends Edge {
 		float diffY = ly * diff * 0.5f;
 
 		//try to restore original length
-		particle1.getPos().add(diffX, diffY);
-		particle2.getPos().add(-diffX, -diffY);
+		p1.add(diffX, diffY);
+		p2.add(-diffX, -diffY);
 	}
 
 	public void draw(Canvas canvas, float scale) {
