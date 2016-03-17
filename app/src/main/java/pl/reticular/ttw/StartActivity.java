@@ -149,7 +149,7 @@ public class StartActivity extends AppCompatActivity
 
 	private void onNewGame() {
 		Intent intent = new Intent(this, GameActivity.class);
-		
+
 		startActivity(intent);
 	}
 
