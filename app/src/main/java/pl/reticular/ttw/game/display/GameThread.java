@@ -36,38 +36,40 @@ public class GameThread implements Runnable {
 
 	private Game game;
 
-	private boolean paused;
+	private boolean enabled;
 
 	public GameThread(SurfaceHolder surfaceHolder) {
 		this.surfaceHolder = surfaceHolder;
 
-		thread = new Thread(this);
-		paused = false;
+		game = null;
+		thread = null;
+		enabled = false;
 	}
 
 	public synchronized void pause() {
-		paused = true;
+		terminate();
 	}
 
 	public synchronized void resume() {
-		paused = false;
-
-		if (thread.getState() == Thread.State.TERMINATED) {
+		if (thread == null) {
 			thread = new Thread(this);
 			thread.start();
 		}
 	}
 
 	public synchronized void terminate() {
-		thread.interrupt();
+		if (thread != null) {
+			thread.interrupt();
 
-		boolean retry = true;
-		while (retry) {
-			try {
-				thread.join();
-				retry = false;
-			} catch (InterruptedException e) {
+			boolean retry = true;
+			while (retry) {
+				try {
+					thread.join();
+					retry = false;
+				} catch (InterruptedException e) {
+				}
 			}
+			thread = null;
 		}
 	}
 
@@ -77,7 +79,7 @@ public class GameThread implements Runnable {
 
 		while (running) {
 			long timeStart = System.currentTimeMillis();
-			if (!paused && surfaceHolder.getSurface().isValid()) {
+			if (enabled && surfaceHolder.getSurface().isValid()) {
 				Canvas c = surfaceHolder.lockCanvas(null);
 
 				try {
@@ -112,8 +114,13 @@ public class GameThread implements Runnable {
 	 * Must be called once
 	 */
 	public synchronized void setGame(Game g) {
-		game = g;
-		thread.start();
+		if (game == null) {
+			game = g;
+		}
+	}
+
+	public synchronized void setEnabled(Boolean e) {
+		enabled = e;
 	}
 
 	public synchronized Game getGame() {

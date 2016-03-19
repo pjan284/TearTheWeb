@@ -70,6 +70,7 @@ public class GameSurfaceView extends SurfaceView implements SurfaceHolder.Callba
 	public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
 		Log.i(getClass().getName(), "surfaceChanged");
 		gameThread.getGame().setSurfaceSize(width, height);
+		gameThread.setEnabled(true);
 	}
 
 	public void surfaceCreated(SurfaceHolder holder) {
