@@ -44,7 +44,7 @@ import java.util.Map;
 
 import pl.reticular.ttw.utils.PrefsHelper;
 import pl.reticular.ttw.utils.PrefsListHelper;
-import pl.reticular.ttw.utils.Result;
+import pl.reticular.ttw.game.Result;
 import pl.reticular.ttw.utils.Settings;
 
 public class HighScoresActivity extends AppCompatActivity

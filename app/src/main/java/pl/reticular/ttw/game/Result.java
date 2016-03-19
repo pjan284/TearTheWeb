@@ -1,4 +1,4 @@
-package pl.reticular.ttw.utils;
+package pl.reticular.ttw.game;
 
 /*
  * Copyright (C) 2016 Piotr Jankowski
@@ -24,43 +24,66 @@ import android.support.annotation.NonNull;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import pl.reticular.ttw.game.webs.WebType;
+import pl.reticular.ttw.utils.Factory;
+import pl.reticular.ttw.utils.Savable;
+
 public class Result implements Savable, Comparable<Result> {
 
-	int score;
 	long date;
+	int score;
+	WebType webType;
 
 	public enum Keys {
+		Date,
 		Score,
-		Date
+		WebType
 	}
 
-	public Result(int score, long date) {
-		this.score = score;
+	public Result(long date, int score, WebType webType) {
 		this.date = date;
+		this.score = score;
+		this.webType = webType;
 	}
 
 	@Override
 	public JSONObject toJSON() throws JSONException {
 		JSONObject json = new JSONObject();
 
-		json.put(Keys.Score.toString(), score);
 		json.put(Keys.Date.toString(), date);
+		json.put(Keys.Score.toString(), score);
+		json.put(Keys.WebType.toString(), webType.toString());
 
 		return json;
-	}
-
-	public int getScore() {
-		return score;
 	}
 
 	public Long getDate() {
 		return date;
 	}
 
+	public int getScore() {
+		return score;
+	}
+
+	public WebType getWebType() {
+		return webType;
+	}
+
 	public static class ResultFactory implements Factory<Result> {
 		@Override
 		public Result fromJson(JSONObject json) throws JSONException {
-			return new Result(json.getInt(Keys.Score.toString()), json.getLong(Keys.Date.toString()));
+			long date = json.getLong(Keys.Date.toString());
+
+			int score = json.getInt(Keys.Score.toString());
+
+			WebType webType;
+			try {
+				webType = WebType.valueOf(json.getString(Keys.WebType.toString()));
+			} catch (IllegalArgumentException e) {
+				webType = WebType.Round4x8;
+			}
+
+			return new Result(date, score, webType);
 		}
 	}
 

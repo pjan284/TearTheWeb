@@ -111,11 +111,11 @@ public abstract class Graph implements Savable {
 		return edges.get(i);
 	}
 
-	protected void insert(Edge e) {
+	public void insert(Edge e) {
 		edges.add(e);
 	}
 
-	protected void insert(Node v) {
+	public void insert(Node v) {
 		nodes.add(v);
 	}
 
@@ -193,5 +193,13 @@ public abstract class Graph implements Savable {
 
 	public Node getNode(int index) {
 		return nodes.get(index);
+	}
+
+	public int getNodesNumber() {
+		return nodes.size();
+	}
+
+	public int getEdgesNumber() {
+		return edges.size();
 	}
 }

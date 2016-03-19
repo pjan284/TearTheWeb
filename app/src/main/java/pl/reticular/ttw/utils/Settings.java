@@ -24,6 +24,7 @@ public class Settings {
 
 	public enum Keys {
 		LastGame,
+		DefaultWebType,
 		HighScores
 	}
 }

@@ -41,10 +41,11 @@ import java.lang.ref.WeakReference;
 import java.util.List;
 
 import pl.reticular.ttw.game.Game;
+import pl.reticular.ttw.game.Result;
 import pl.reticular.ttw.game.display.GameSurfaceView;
+import pl.reticular.ttw.game.webs.WebType;
 import pl.reticular.ttw.utils.PrefsHelper;
 import pl.reticular.ttw.utils.PrefsListHelper;
-import pl.reticular.ttw.utils.Result;
 import pl.reticular.ttw.utils.Settings;
 
 public class GameActivity extends AppCompatActivity implements SensorEventListener {
@@ -100,11 +101,11 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
 			gameSurfaceView.setGame(lastGame);
 		} else {
 			if (lastGame != null) {
-				saveHighScore(lastGame.getScore());
+				saveResult(lastGame.getResult());
 			}
 
 			//create new game
-			Game newGame = new Game(this, new MessageHandler(this));
+			Game newGame = new Game(this, new MessageHandler(this), lastGameWebType());
 			gameSurfaceView.setGame(newGame);
 		}
 
@@ -167,14 +168,14 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
 		}
 	}
 
-	private void saveHighScore(int score) {
+	private void saveResult(Result result) {
 		// clear last game data
 		clearLastGameData();
 
 		// but preserve score
 		PrefsListHelper<Result> helper = new PrefsListHelper<>(new Result.ResultFactory());
 		List<Result> highScores = helper.getList(preferences, Settings.Keys.HighScores.toString());
-		highScores.add(new Result(score, System.currentTimeMillis()));
+		highScores.add(result);
 		helper.putList(preferences, Settings.Keys.HighScores.toString(), highScores);
 	}
 
@@ -193,6 +194,19 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
 			}
 		}
 		return null;
+	}
+
+	private WebType lastGameWebType() {
+		if (!preferences.contains(Settings.Keys.DefaultWebType.toString())) {
+			PrefsHelper.putString(preferences, Settings.Keys.DefaultWebType.toString(), WebType.Round4x8.toString());
+		}
+
+		try {
+			return WebType.valueOf(preferences.getString(Settings.Keys.DefaultWebType.toString(), WebType.Round4x8.toString()));
+		} catch (IllegalArgumentException e) {
+			PrefsHelper.putString(preferences, Settings.Keys.DefaultWebType.toString(), WebType.Round4x8.toString());
+			return WebType.Round4x8;
+		}
 	}
 
 	private static class MessageHandler extends Handler {
@@ -247,7 +261,7 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
 		toast.setGravity(Gravity.CENTER, 0, 0);
 		toast.show();
 
-		saveHighScore(score);
+		saveResult(gameSurfaceView.getThread().getGame().getResult());
 
 		handler.postDelayed(new Runnable() {
 			@Override

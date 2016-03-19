@@ -38,21 +38,21 @@ public class Web extends Graph {
 
 	private WebObserver observer;
 
-	Web() {
+	public Web() {
 		super();
 	}
 
-	Web(JSONObject json) throws JSONException {
+	public Web(JSONObject json) throws JSONException {
 		super(json);
 	}
 
 	@Override
-	protected Node recreateNode(JSONObject state) throws JSONException {
+	public Node recreateNode(JSONObject state) throws JSONException {
 		return new Particle(state);
 	}
 
 	@Override
-	protected Edge recreateEdge(JSONObject state) throws JSONException {
+	public Edge recreateEdge(JSONObject state) throws JSONException {
 		return new Spring(this, state);
 	}
 
@@ -60,7 +60,7 @@ public class Web extends Graph {
 		return super.toJSON();
 	}
 
-	protected void addChain(Particle part1, Particle part2, int segments) {
+	public void addChain(Particle part1, Particle part2, int segments) {
 		Vector2 p1 = part1.getPos();
 		Vector2 p2 = part2.getPos();
 		Particle start = part1;
@@ -80,7 +80,7 @@ public class Web extends Graph {
 		edges.add(spring);
 	}
 
-	protected void addNormalizedChain(Particle part1, Particle part2, float segmentLength) {
+	public void addNormalizedChain(Particle part1, Particle part2, float segmentLength) {
 		Vector2 p1 = part1.getPos();
 		Vector2 p2 = part2.getPos();
 		float length = Vector2.sub(p1, p2).length();
@@ -88,7 +88,7 @@ public class Web extends Graph {
 		addChain(part1, part2, (int) Math.ceil(length / segmentLength));
 	}
 
-	protected void update(float dt, Vector2 gravity, RectF gameArea) {
+	public void update(float dt, Vector2 gravity, RectF gameArea) {
 		// Resolve springs and remove broken
 		for (int i = 0; i < physicsAccuracy; i++) {
 			Iterator<Edge> it = edges.iterator();
@@ -121,17 +121,17 @@ public class Web extends Graph {
 		}
 	}
 
-	protected void draw(Canvas canvas, float scale) {
+	public void draw(Canvas canvas, float scale) {
 		for (Edge edge : edges) {
 			((Spring) edge).draw(canvas, scale);
 		}
 
-		for (Node node : nodes) {
-			((Particle) node).draw(canvas, scale);
-		}
+//		for (Node node : nodes) {
+//			((Particle) node).draw(canvas, scale);
+//		}
 	}
 
-	Particle selectParticleInRange(Vector2 clickPos, float r) {
+	public Particle selectParticleInRange(Vector2 clickPos, float r) {
 		float minDistance = r;
 		Particle chosen = null;
 		for (Node node : nodes) {

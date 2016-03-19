@@ -5,6 +5,7 @@
     <string name="title_activity_high_scores">High Scores</string>
     <string name="title_activity_help">Help</string>
     <string name="title_activity_about">About</string>
+    <string name="title_activity_webs">Choose web</string>
     <string name="start_tear_the_web">Tear The Web</string>
     <string name="start_spiders">(and get rid of spiders)</string>
     <string name="start_new_game">&gt; New Game &lt;</string>

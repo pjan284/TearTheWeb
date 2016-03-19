@@ -21,8 +21,10 @@ package pl.reticular.ttw.game;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.RectF;
 import android.os.Bundle;
 import android.os.Handler;
@@ -36,6 +38,9 @@ import org.json.JSONObject;
 import java.util.Iterator;
 import java.util.LinkedList;
 
+import pl.reticular.ttw.R;
+import pl.reticular.ttw.game.webs.WebFactory;
+import pl.reticular.ttw.game.webs.WebType;
 import pl.reticular.ttw.utils.Savable;
 import pl.reticular.ttw.utils.Vector2;
 
@@ -44,11 +49,13 @@ public class Game implements Savable {
 
 	private enum Keys {
 		Web,
+		WebType,
 		Finger,
 		Spiders,
 		LivesLeft,
 		Level,
-		Score
+		Score,
+		ScoreDate
 	}
 
 	public enum MessageFields {
@@ -78,29 +85,32 @@ public class Game implements Savable {
 
 	private Web web;
 
+	private WebType webType;
+
 	private Vector2 moveStart;
 	private Particle movedParticle;
 
 	private int livesLeft;
 	private int level;
 	private int score;
+	private long scoreDate;
 
 	private LinkedList<Spider> spiders;
 
 	private Vector2 gravity;
 
-	public Game(Context context, Handler messageHandler) {
+	public Game(Context context, Handler messageHandler, WebType webType) {
 		this.context = context;
 		this.messageHandler = messageHandler;
-
-		//Resources res = context.getResources();
-		//backgroundImage = BitmapFactory.decodeResource(res, R.drawable.background);
+		this.webType = webType;
 
 		livesLeft = 1;
 		level = 1;
 		score = 0;
+		scoreDate = System.currentTimeMillis();
 
-		createWeb();
+		web = WebFactory.createWeb(webType);
+		setupWebObserver(web);
 
 		finger = new Finger();
 
@@ -124,9 +134,16 @@ public class Game implements Savable {
 
 		level = json.getInt(Keys.Level.toString());
 		score = json.getInt(Keys.Score.toString());
+		scoreDate = json.getLong(Keys.ScoreDate.toString());
 
 		web = new Web(json.getJSONObject(Keys.Web.toString()));
-		setupWebObserver();
+		setupWebObserver(web);
+
+		try {
+			webType = WebType.valueOf(json.getString(Keys.WebType.toString()));
+		} catch (IllegalArgumentException e) {
+			webType = WebType.Round4x8;
+		}
 
 		finger = new Finger(json.getJSONObject(Keys.Finger.toString()));
 
@@ -151,6 +168,7 @@ public class Game implements Savable {
 		JSONObject state = new JSONObject();
 
 		state.put(Keys.Web.toString(), web.toJSON());
+		state.put(Keys.WebType.toString(), webType.toString());
 		state.put(Keys.Finger.toString(), finger.toJSON());
 
 		JSONArray spidersData = new JSONArray();
@@ -165,16 +183,12 @@ public class Game implements Savable {
 		state.put(Keys.LivesLeft.toString(), livesLeft);
 		state.put(Keys.Level.toString(), level);
 		state.put(Keys.Score.toString(), score);
+		state.put(Keys.ScoreDate.toString(), scoreDate);
 
 		return state;
 	}
 
-	private void createWeb() {
-		web = new RoundWeb(0, 0, 0.1f, 0.9f, 3, 8, 0.1f);
-		setupWebObserver();
-	}
-
-	private void setupWebObserver() {
+	private void setupWebObserver(Web web) {
 		web.setObserver(new WebObserver() {
 			@Override
 			public void onSpringBroken(Spring spring) {
@@ -201,7 +215,8 @@ public class Game implements Savable {
 		level += 1;
 		livesLeft = level;
 
-		createWeb();
+		web = WebFactory.createWeb(webType);
+		setupWebObserver(web);
 
 		finger = new Finger();
 
@@ -269,15 +284,22 @@ public class Game implements Savable {
 		canvasWidth = width;
 		canvasHeight = height;
 
-		// resize the background image
-		//backgroundImage = Bitmap.createScaledBitmap(backgroundImage, width, height, true);
-
+		// calculate scale and game area
 		int min = Math.min(width, height);
 		canvasScale = min * 0.5f;
 
 		float x = (float) width / (float) min;
 		float y = (float) height / (float) min;
 		gameArea = new RectF(-x, -y, x, y);
+
+		// create background image
+		Bitmap backgroundBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.web);
+		@SuppressWarnings("deprecation")
+		int backgroundColor = context.getResources().getColor(R.color.colorBackground);
+		backgroundImage = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+		Canvas backgroundCanvas = new Canvas(backgroundImage);
+		backgroundCanvas.translate(width / 2, height / 2);
+		WebFactory.generateBackground(backgroundCanvas, backgroundBitmap, backgroundColor, backgroundColor, Color.BLACK, canvasScale, webType);
 	}
 
 	public void frame(Canvas canvas, float dt) {
@@ -288,8 +310,7 @@ public class Game implements Savable {
 	public void draw(Canvas canvas) {
 		canvas.save();
 
-		canvas.drawColor(Color.BLACK);
-		//canvas.drawBitmap(backgroundImage, 0, 0, null);
+		canvas.drawBitmap(backgroundImage, 0, 0, null);
 
 		canvas.translate(canvasWidth / 2, canvasHeight / 2);
 
@@ -306,11 +327,8 @@ public class Game implements Savable {
 
 	private void addScore(int add) {
 		score += add * level;
+		scoreDate = System.currentTimeMillis();
 		messageScore();
-	}
-
-	public int getScore() {
-		return score;
 	}
 
 	public void update(float dt) {
@@ -414,5 +432,9 @@ public class Game implements Savable {
 	public void setGravity(float x, float y, float z) {
 		gravity.set(-x, y + Math.abs(z)); // y is backwards, so here is positive
 		gravity.scale(0.2f);
+	}
+
+	public Result getResult() {
+		return new Result(scoreDate, score, webType);
 	}
 }

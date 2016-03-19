@@ -111,6 +111,9 @@ public class StartActivity extends AppCompatActivity
 					case R.id.action_help:
 						onHelp();
 						return true;
+					case R.id.action_webs:
+						onWebs();
+						return true;
 					default:
 						return false;
 				}
@@ -149,6 +152,12 @@ public class StartActivity extends AppCompatActivity
 
 	private void onNewGame() {
 		Intent intent = new Intent(this, GameActivity.class);
+
+		startActivity(intent);
+	}
+
+	private void onWebs() {
+		Intent intent = new Intent(this, WebsActivity.class);
 
 		startActivity(intent);
 	}
