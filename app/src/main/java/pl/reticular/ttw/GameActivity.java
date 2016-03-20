@@ -174,9 +174,10 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
 		clearLastGameData();
 
 		// but preserve score
-		SQLiteDatabase db = new DBHelper(this).getWritableDatabase();
+		DBHelper dbHelper = new DBHelper(this);
+		SQLiteDatabase db = dbHelper.getWritableDatabase();
 		ResultsTableHelper.insert(db, result);
-		db.close();
+		dbHelper.close();
 	}
 
 	private void clearLastGameData() {

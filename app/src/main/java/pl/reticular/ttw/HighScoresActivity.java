@@ -135,16 +135,16 @@ public class HighScoresActivity extends AppCompatActivity {
 	private Cursor createCursor() {
 		SQLiteDatabase db = dbHelper.getReadableDatabase();
 
-		String table = ResultsTableHelper.RESULT.TABLE_NAME;
+		String table = ResultsTableHelper.TABLE_NAME;
 
 		String[] columns = new String[]{
 				ResultsTableHelper.RESULT._ID,
-				ResultsTableHelper.RESULT.COLUMN_DATE,
-				ResultsTableHelper.RESULT.COLUMN_SCORE
+				ResultsTableHelper.RESULT.DATE,
+				ResultsTableHelper.RESULT.SCORE
 		};
 
-		String orderBy = ResultsTableHelper.RESULT.COLUMN_SCORE + " DESC, " +
-				ResultsTableHelper.RESULT.COLUMN_DATE + " DESC";
+		String orderBy = ResultsTableHelper.RESULT.SCORE + " DESC, " +
+				ResultsTableHelper.RESULT.DATE + " DESC";
 
 		return db.query(table, columns, null, null, null, null, orderBy, null);
 	}
@@ -152,7 +152,7 @@ public class HighScoresActivity extends AppCompatActivity {
 	private void clearHighScores() {
 		SQLiteDatabase db = dbHelper.getWritableDatabase();
 
-		db.delete(ResultsTableHelper.RESULT.TABLE_NAME, null, null);
+		db.delete(ResultsTableHelper.TABLE_NAME, null, null);
 	}
 
 	private class HighScoresCursorAdapter extends CursorAdapter {
@@ -170,8 +170,8 @@ public class HighScoresActivity extends AppCompatActivity {
 			TextView dateText = (TextView) view.findViewById(R.id.text_date);
 			TextView scoreText = (TextView) view.findViewById(R.id.text_score);
 
-			long date = cursor.getLong(cursor.getColumnIndexOrThrow(ResultsTableHelper.RESULT.COLUMN_DATE));
-			int score = cursor.getInt(cursor.getColumnIndexOrThrow(ResultsTableHelper.RESULT.COLUMN_SCORE));
+			long date = cursor.getLong(cursor.getColumnIndexOrThrow(ResultsTableHelper.RESULT.DATE));
+			int score = cursor.getInt(cursor.getColumnIndexOrThrow(ResultsTableHelper.RESULT.SCORE));
 
 			long now = System.currentTimeMillis();
 			String timeSpan = (String) DateUtils.getRelativeTimeSpanString(date, now, DateUtils.SECOND_IN_MILLIS, DateUtils.FORMAT_ABBREV_RELATIVE);
