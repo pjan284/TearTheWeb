@@ -19,21 +19,18 @@ package pl.reticular.ttw.game;
  * along with Tear The Web. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import android.support.annotation.NonNull;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import pl.reticular.ttw.game.webs.WebType;
-import pl.reticular.ttw.utils.Factory;
 import pl.reticular.ttw.utils.Savable;
 
-public class Result implements Savable, Comparable<Result> {
+public class Result implements Savable {
 
-	long date;
-	int level;
-	int score;
-	WebType webType;
+	private long date;
+	private int level;
+	private int score;
+	private WebType webType;
 
 	public enum Keys {
 		Date,
@@ -75,43 +72,6 @@ public class Result implements Savable, Comparable<Result> {
 
 	public WebType getWebType() {
 		return webType;
-	}
-
-	public static class ResultFactory implements Factory<Result> {
-		@Override
-		public Result fromJson(JSONObject json) throws JSONException {
-			long date = json.getLong(Keys.Date.toString());
-
-			int level = json.getInt(Keys.Level.toString());
-
-			int score = json.getInt(Keys.Score.toString());
-
-			WebType webType;
-			try {
-				webType = WebType.valueOf(json.getString(Keys.WebType.toString()));
-			} catch (IllegalArgumentException e) {
-				webType = WebType.Round4x8;
-			}
-
-			return new Result(date, level, score, webType);
-		}
-	}
-
-	@Override
-	public int compareTo(@NonNull Result another) {
-		int diffScore = another.getScore() - getScore();
-		if (diffScore == 0) {
-			long diffDate = another.getDate() - getDate();
-			if (diffDate == 0) {
-				return 0;
-			} else if (diffDate < 0) {
-				return -1;
-			} else {
-				return 1;
-			}
-		} else {
-			return diffScore;
-		}
 	}
 }
 

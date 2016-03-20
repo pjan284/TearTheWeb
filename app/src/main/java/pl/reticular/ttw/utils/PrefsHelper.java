@@ -19,9 +19,16 @@ package pl.reticular.ttw.utils;
  * along with Tear The Web. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import android.content.Context;
 import android.content.SharedPreferences;
 
 public class PrefsHelper {
+	private static final String PREFS_NAME = "Prefs";
+
+	public static SharedPreferences getPrefs(Context context) {
+		return context.getSharedPreferences(PREFS_NAME, 0);
+	}
+
 	public static void remove(SharedPreferences prefs, String key) {
 		SharedPreferences.Editor editor = prefs.edit();
 		editor.remove(key);

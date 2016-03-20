@@ -19,11 +19,6 @@ package pl.reticular.ttw.utils;
  * along with Tear The Web. If not, see <http://www.gnu.org/licenses/>.
  */
 
-public class Settings {
-	public static final String SETTINGS_NAME = "Settings";
-
-	public enum Keys {
-		LastGame,
-		DefaultWebType
-	}
+public enum Prefs {
+	LastGame
 }

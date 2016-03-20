@@ -30,7 +30,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 
-import pl.reticular.ttw.utils.Settings;
+import pl.reticular.ttw.utils.Prefs;
+import pl.reticular.ttw.utils.PrefsHelper;
 
 public class StartActivity extends AppCompatActivity
 		implements SharedPreferences.OnSharedPreferenceChangeListener {
@@ -79,8 +80,8 @@ public class StartActivity extends AppCompatActivity
 			}
 		});
 
-		preferences = getSharedPreferences(Settings.SETTINGS_NAME, 0);
-		continueButton.setEnabled(preferences.contains(Settings.Keys.LastGame.toString()));
+		preferences = PrefsHelper.getPrefs(this);
+		continueButton.setEnabled(preferences.contains(Prefs.LastGame.toString()));
 	}
 
 	@Override
@@ -155,8 +156,8 @@ public class StartActivity extends AppCompatActivity
 
 	@Override
 	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-		if (Settings.Keys.valueOf(key) == Settings.Keys.LastGame) {
-			continueButton.setEnabled(preferences.contains(Settings.Keys.LastGame.toString()));
+		if (Prefs.valueOf(key) == Prefs.LastGame) {
+			continueButton.setEnabled(preferences.contains(Prefs.LastGame.toString()));
 		}
 	}
 }

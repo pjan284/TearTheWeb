@@ -45,9 +45,9 @@ import pl.reticular.ttw.game.Result;
 import pl.reticular.ttw.game.display.GameSurfaceView;
 import pl.reticular.ttw.game.webs.WebType;
 import pl.reticular.ttw.utils.DBHelper;
+import pl.reticular.ttw.utils.Prefs;
 import pl.reticular.ttw.utils.PrefsHelper;
 import pl.reticular.ttw.utils.ResultsTableHelper;
-import pl.reticular.ttw.utils.Settings;
 
 public class GameActivity extends AppCompatActivity implements SensorEventListener {
 
@@ -81,7 +81,7 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
 		topLeftText = (TextView) findViewById(R.id.text_top_left);
 		topRightText = (TextView) findViewById(R.id.text_top_right);
 
-		preferences = getSharedPreferences(Settings.SETTINGS_NAME, 0);
+		preferences = PrefsHelper.getPrefs(this);
 
 		// load last played game
 		Game lastGame = loadLastGame();
@@ -163,7 +163,7 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
 	private void saveLastGame(Game game) {
 		try {
 			String data = game.toJSON().toString();
-			PrefsHelper.putString(preferences, Settings.Keys.LastGame.toString(), data);
+			PrefsHelper.putString(preferences, Prefs.LastGame.toString(), data);
 		} catch (JSONException e) {
 			clearLastGameData();
 		}
@@ -181,13 +181,13 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
 	}
 
 	private void clearLastGameData() {
-		PrefsHelper.remove(preferences, Settings.Keys.LastGame.toString());
+		PrefsHelper.remove(preferences, Prefs.LastGame.toString());
 	}
 
 	private Game loadLastGame() {
-		if (preferences.contains(Settings.Keys.LastGame.toString())) {
+		if (preferences.contains(Prefs.LastGame.toString())) {
 			try {
-				String data = preferences.getString(Settings.Keys.LastGame.toString(), "{}");
+				String data = preferences.getString(Prefs.LastGame.toString(), "{}");
 				JSONObject lastGameData = new JSONObject(data);
 				return new Game(this, new MessageHandler(this), lastGameData);
 			} catch (JSONException e) {
