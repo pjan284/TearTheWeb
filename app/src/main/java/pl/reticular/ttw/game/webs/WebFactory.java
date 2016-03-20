@@ -32,11 +32,11 @@ public class WebFactory {
 			case Round5x6:
 				web = RoundWebFactory.createRoundWeb(0, 0, 0.1f, 0.9f, 5, 6, 0.1f);
 				break;
-			case Round5x7:
-				web = RoundWebFactory.createRoundWeb(0, 0, 0.1f, 0.9f, 5, 7, 0.1f);
-				break;
 			case Round4x7:
 				web = RoundWebFactory.createRoundWeb(0, 0, 0.1f, 0.9f, 4, 7, 0.1f);
+				break;
+			case Round5x7:
+				web = RoundWebFactory.createRoundWeb(0, 0, 0.1f, 0.9f, 5, 7, 0.1f);
 				break;
 			case Round4x8:
 				web = RoundWebFactory.createRoundWeb(0, 0, 0.1f, 0.9f, 4, 8, 0.1f);
@@ -64,10 +64,10 @@ public class WebFactory {
 			case Round5x6:
 				RoundWebFactory.generateBackground(canvas, backgroundBitmap, backgroundColor, areaColor, borderColor, scale, 0, 0, 0.9f);
 				break;
-			case Round5x7:
+			case Round4x7:
 				RoundWebFactory.generateBackground(canvas, backgroundBitmap, backgroundColor, areaColor, borderColor, scale, 0, 0, 0.9f);
 				break;
-			case Round4x7:
+			case Round5x7:
 				RoundWebFactory.generateBackground(canvas, backgroundBitmap, backgroundColor, areaColor, borderColor, scale, 0, 0, 0.9f);
 				break;
 			case Round4x8:

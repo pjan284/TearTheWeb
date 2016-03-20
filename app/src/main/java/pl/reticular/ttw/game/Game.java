@@ -78,7 +78,7 @@ public class Game implements Savable {
 
 	private RectF gameArea;
 
-	private Bitmap backgroundImage;
+	private Bitmap backgroundBitmap;
 
 	private Finger finger;
 
@@ -214,8 +214,13 @@ public class Game implements Savable {
 		level += 1;
 		livesLeft = level;
 
+		webType = WebType.values()[(webType.ordinal() + 1) % WebType.values().length];
+
 		web = WebFactory.createWeb(webType);
 		setupWebObserver(web);
+
+		backgroundBitmap.recycle();
+		setupBackground(canvasWidth, canvasHeight);
 
 		finger = new Finger();
 
@@ -291,12 +296,16 @@ public class Game implements Savable {
 		float y = (float) height / (float) min;
 		gameArea = new RectF(-x, -y, x, y);
 
+		setupBackground(width, height);
+	}
+
+	private void setupBackground(int width, int height) {
 		// create background image
 		Bitmap backgroundBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.web);
 		@SuppressWarnings("deprecation")
 		int backgroundColor = context.getResources().getColor(R.color.colorBackground);
-		backgroundImage = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-		Canvas backgroundCanvas = new Canvas(backgroundImage);
+		this.backgroundBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+		Canvas backgroundCanvas = new Canvas(this.backgroundBitmap);
 		backgroundCanvas.translate(width / 2, height / 2);
 		WebFactory.generateBackground(backgroundCanvas, backgroundBitmap, backgroundColor, backgroundColor, Color.BLACK, canvasScale, webType);
 	}
@@ -309,7 +318,7 @@ public class Game implements Savable {
 	public void draw(Canvas canvas) {
 		canvas.save();
 
-		canvas.drawBitmap(backgroundImage, 0, 0, null);
+		canvas.drawBitmap(backgroundBitmap, 0, 0, null);
 
 		canvas.translate(canvasWidth / 2, canvasHeight / 2);
 

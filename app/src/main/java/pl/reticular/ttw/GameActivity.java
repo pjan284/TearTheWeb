@@ -106,7 +106,7 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
 			}
 
 			//create new game
-			Game newGame = new Game(this, new MessageHandler(this), lastGameWebType());
+			Game newGame = new Game(this, new MessageHandler(this), WebType.Round5x6);
 			gameSurfaceView.setGame(newGame);
 		}
 
@@ -195,19 +195,6 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
 			}
 		}
 		return null;
-	}
-
-	private WebType lastGameWebType() {
-		if (!preferences.contains(Settings.Keys.DefaultWebType.toString())) {
-			PrefsHelper.putString(preferences, Settings.Keys.DefaultWebType.toString(), WebType.Round4x8.toString());
-		}
-
-		try {
-			return WebType.valueOf(preferences.getString(Settings.Keys.DefaultWebType.toString(), WebType.Round4x8.toString()));
-		} catch (IllegalArgumentException e) {
-			PrefsHelper.putString(preferences, Settings.Keys.DefaultWebType.toString(), WebType.Round4x8.toString());
-			return WebType.Round4x8;
-		}
 	}
 
 	private static class MessageHandler extends Handler {
