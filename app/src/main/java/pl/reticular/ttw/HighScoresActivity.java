@@ -19,45 +19,33 @@ package pl.reticular.ttw;
  * along with Tear The Web. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import android.content.SharedPreferences;
+import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.v4.widget.CursorAdapter;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.format.DateUtils;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ListAdapter;
 import android.widget.ListView;
-import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import pl.reticular.ttw.utils.DBHelper;
+import pl.reticular.ttw.utils.ResultsTableHelper;
 
-import pl.reticular.ttw.utils.PrefsHelper;
-import pl.reticular.ttw.utils.PrefsListHelper;
-import pl.reticular.ttw.game.Result;
-import pl.reticular.ttw.utils.Settings;
+public class HighScoresActivity extends AppCompatActivity {
 
-public class HighScoresActivity extends AppCompatActivity
-		implements SharedPreferences.OnSharedPreferenceChangeListener {
+	private CursorAdapter adapter;
 
-	private enum Columns {
-		Date,
-		Score
-	}
-
-	private SharedPreferences preferences;
-
-	private ListView listView;
+	private DBHelper dbHelper;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -74,16 +62,18 @@ public class HighScoresActivity extends AppCompatActivity
 			actionBar.setDisplayHomeAsUpEnabled(true);
 		}
 
-		listView = (ListView) findViewById(R.id.list_high_scores);
+		ListView listView = (ListView) findViewById(R.id.list_high_scores);
 		TextView noGames = (TextView) findViewById(R.id.text_no_games);
 
 		listView.setEmptyView(noGames);
 
 		listView.addHeaderView(createHeader(listView));
 
-		preferences = getSharedPreferences(Settings.SETTINGS_NAME, 0);
+		adapter = new HighScoresCursorAdapter(this, null, 0);
 
-		listView.setAdapter(createAdapter());
+		listView.setAdapter(adapter);
+
+		dbHelper = new DBHelper(this);
 	}
 
 	@Override
@@ -98,7 +88,8 @@ public class HighScoresActivity extends AppCompatActivity
 		super.onStart();
 		Log.i(getClass().getName(), "onStart");
 
-		preferences.registerOnSharedPreferenceChangeListener(this);
+		Cursor cursor = createCursor();
+		adapter.changeCursor(cursor);
 	}
 
 	@Override
@@ -106,7 +97,7 @@ public class HighScoresActivity extends AppCompatActivity
 		super.onStop();
 		Log.i(getClass().getName(), "onStop");
 
-		preferences.unregisterOnSharedPreferenceChangeListener(this);
+		dbHelper.close();
 	}
 
 	@Override
@@ -114,8 +105,9 @@ public class HighScoresActivity extends AppCompatActivity
 		switch (item.getItemId()) {
 			// Respond to the clear button
 			case R.id.action_clear:
-				PrefsHelper.remove(preferences, Settings.Keys.HighScores.toString());
-				// we will be notified when it's done
+				clearHighScores();
+				Cursor cursor = createCursor();
+				adapter.changeCursor(cursor);
 				break;
 			// Respond to the action bar's Up/Home button
 			case android.R.id.home:
@@ -124,44 +116,6 @@ public class HighScoresActivity extends AppCompatActivity
 		}
 
 		return super.onOptionsItemSelected(item);
-	}
-
-	@Override
-	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-		if (Settings.Keys.valueOf(key) == Settings.Keys.HighScores) {
-			listView.setAdapter(createAdapter());
-		}
-	}
-
-	private Map<String, String> createRowData(Long date, Integer score) {
-		Map<String, String> map = new HashMap<>();
-		long now = System.currentTimeMillis();
-		String timeSpan = (String) DateUtils.getRelativeTimeSpanString(date, now, DateUtils.SECOND_IN_MILLIS, DateUtils.FORMAT_ABBREV_RELATIVE);
-		map.put(Columns.Date.toString(), timeSpan);
-		map.put(Columns.Score.toString(), String.format("%d", score));
-		return map;
-	}
-
-	private List<Map<String, String>> createData() {
-		PrefsListHelper<Result> helper = new PrefsListHelper<>(new Result.ResultFactory());
-		List<Result> highScores = helper.getList(preferences, Settings.Keys.HighScores.toString());
-
-		Collections.sort(highScores);
-
-		List<Map<String, String>> list = new LinkedList<>();
-		for (Result result : highScores) {
-			list.add(createRowData(result.getDate(), result.getScore()));
-		}
-		return list;
-	}
-
-	private ListAdapter createAdapter() {
-		List<Map<String, String>> adapterData = createData();
-
-		String[] fromColumns = {Columns.Date.toString(), Columns.Score.toString()};
-		int[] toViews = {R.id.text_date, R.id.text_score};
-
-		return new SimpleAdapter(this, adapterData, R.layout.layout_high_score, fromColumns, toViews);
 	}
 
 	private View createHeader(ViewGroup listView) {
@@ -176,5 +130,54 @@ public class HighScoresActivity extends AppCompatActivity
 		scoreText.setText(R.string.high_scores_score);
 
 		return header;
+	}
+
+	private Cursor createCursor() {
+		SQLiteDatabase db = dbHelper.getReadableDatabase();
+
+		String table = ResultsTableHelper.RESULT.TABLE_NAME;
+
+		String[] columns = new String[]{
+				ResultsTableHelper.RESULT._ID,
+				ResultsTableHelper.RESULT.COLUMN_DATE,
+				ResultsTableHelper.RESULT.COLUMN_SCORE
+		};
+
+		String orderBy = ResultsTableHelper.RESULT.COLUMN_SCORE + " DESC, " +
+				ResultsTableHelper.RESULT.COLUMN_DATE + " DESC";
+
+		return db.query(table, columns, null, null, null, null, orderBy, null);
+	}
+
+	private void clearHighScores() {
+		SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+		db.delete(ResultsTableHelper.RESULT.TABLE_NAME, null, null);
+	}
+
+	private class HighScoresCursorAdapter extends CursorAdapter {
+		public HighScoresCursorAdapter(Context context, Cursor cursor, int flags) {
+			super(context, cursor, flags);
+		}
+
+		@Override
+		public View newView(Context context, Cursor cursor, ViewGroup parent) {
+			return LayoutInflater.from(context).inflate(R.layout.layout_high_score, parent, false);
+		}
+
+		@Override
+		public void bindView(View view, Context context, Cursor cursor) {
+			TextView dateText = (TextView) view.findViewById(R.id.text_date);
+			TextView scoreText = (TextView) view.findViewById(R.id.text_score);
+
+			long date = cursor.getLong(cursor.getColumnIndexOrThrow(ResultsTableHelper.RESULT.COLUMN_DATE));
+			int score = cursor.getInt(cursor.getColumnIndexOrThrow(ResultsTableHelper.RESULT.COLUMN_SCORE));
+
+			long now = System.currentTimeMillis();
+			String timeSpan = (String) DateUtils.getRelativeTimeSpanString(date, now, DateUtils.SECOND_IN_MILLIS, DateUtils.FORMAT_ABBREV_RELATIVE);
+			dateText.setText(timeSpan);
+
+			scoreText.setText(String.format("%d", score));
+		}
 	}
 }

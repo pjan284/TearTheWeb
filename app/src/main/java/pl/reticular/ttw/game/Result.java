@@ -31,17 +31,20 @@ import pl.reticular.ttw.utils.Savable;
 public class Result implements Savable, Comparable<Result> {
 
 	long date;
+	int level;
 	int score;
 	WebType webType;
 
 	public enum Keys {
 		Date,
+		Level,
 		Score,
 		WebType
 	}
 
-	public Result(long date, int score, WebType webType) {
+	public Result(long date, int level, int score, WebType webType) {
 		this.date = date;
+		this.level = level;
 		this.score = score;
 		this.webType = webType;
 	}
@@ -51,6 +54,7 @@ public class Result implements Savable, Comparable<Result> {
 		JSONObject json = new JSONObject();
 
 		json.put(Keys.Date.toString(), date);
+		json.put(Keys.Level.toString(), level);
 		json.put(Keys.Score.toString(), score);
 		json.put(Keys.WebType.toString(), webType.toString());
 
@@ -59,6 +63,10 @@ public class Result implements Savable, Comparable<Result> {
 
 	public Long getDate() {
 		return date;
+	}
+
+	public int getLevel() {
+		return level;
 	}
 
 	public int getScore() {
@@ -74,6 +82,8 @@ public class Result implements Savable, Comparable<Result> {
 		public Result fromJson(JSONObject json) throws JSONException {
 			long date = json.getLong(Keys.Date.toString());
 
+			int level = json.getInt(Keys.Level.toString());
+
 			int score = json.getInt(Keys.Score.toString());
 
 			WebType webType;
@@ -83,7 +93,7 @@ public class Result implements Savable, Comparable<Result> {
 				webType = WebType.Round4x8;
 			}
 
-			return new Result(date, score, webType);
+			return new Result(date, level, score, webType);
 		}
 	}
 

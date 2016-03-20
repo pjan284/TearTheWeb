@@ -21,6 +21,7 @@ package pl.reticular.ttw;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.sqlite.SQLiteDatabase;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -38,14 +39,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.lang.ref.WeakReference;
-import java.util.List;
 
 import pl.reticular.ttw.game.Game;
 import pl.reticular.ttw.game.Result;
 import pl.reticular.ttw.game.display.GameSurfaceView;
 import pl.reticular.ttw.game.webs.WebType;
+import pl.reticular.ttw.utils.DBHelper;
 import pl.reticular.ttw.utils.PrefsHelper;
-import pl.reticular.ttw.utils.PrefsListHelper;
+import pl.reticular.ttw.utils.ResultsTableHelper;
 import pl.reticular.ttw.utils.Settings;
 
 public class GameActivity extends AppCompatActivity implements SensorEventListener {
@@ -173,10 +174,9 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
 		clearLastGameData();
 
 		// but preserve score
-		PrefsListHelper<Result> helper = new PrefsListHelper<>(new Result.ResultFactory());
-		List<Result> highScores = helper.getList(preferences, Settings.Keys.HighScores.toString());
-		highScores.add(result);
-		helper.putList(preferences, Settings.Keys.HighScores.toString(), highScores);
+		SQLiteDatabase db = new DBHelper(this).getWritableDatabase();
+		ResultsTableHelper.insert(db, result);
+		db.close();
 	}
 
 	private void clearLastGameData() {
