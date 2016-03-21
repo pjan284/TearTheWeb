@@ -162,7 +162,7 @@ public class Game implements Savable {
 	}
 
 	@Override
-	public JSONObject toJSON() throws JSONException {
+	public synchronized JSONObject toJSON() throws JSONException {
 
 		JSONObject state = new JSONObject();
 
@@ -185,6 +185,69 @@ public class Game implements Savable {
 		state.put(Keys.ScoreDate.toString(), scoreDate);
 
 		return state;
+	}
+
+	public synchronized void setSurfaceSize(int width, int height) {
+		canvasWidth = width;
+		canvasHeight = height;
+
+		// calculate scale and game area
+		int min = Math.min(width, height);
+		canvasScale = min * 0.5f;
+
+		float x = (float) width / (float) min;
+		float y = (float) height / (float) min;
+		gameArea = new RectF(-x, -y, x, y);
+
+		setupBackground(width, height);
+	}
+
+	public synchronized void onTouchEvent(MotionEvent motionEvent) {
+		switch (motionEvent.getAction()) {
+			case MotionEvent.ACTION_DOWN:
+				Vector2 click = new Vector2(
+						motionEvent.getX() - canvasWidth / 2,
+						motionEvent.getY() - canvasHeight / 2);
+				click.scale(1.0f / canvasScale);
+
+				Particle pulled = web.selectParticleInRange(click, finger.getRadius());
+				if (pulled != null) {
+					for (Spider spider : spiders) {
+						spider.onParticlePulled(pulled);
+					}
+					finger.setPos(click);
+					finger.setVisible(true);
+					setParticleToMove(pulled);
+				}
+				moveStart = click;
+				break;
+			case MotionEvent.ACTION_MOVE:
+				Vector2 move = new Vector2(
+						motionEvent.getX() - canvasWidth / 2,
+						motionEvent.getY() - canvasHeight / 2);
+				move.scale(1.0f / canvasScale);
+				moveParticle(Vector2.sub(move, moveStart));
+				finger.setPos(move);
+				moveStart = move;
+				break;
+			case MotionEvent.ACTION_CANCEL:
+			case MotionEvent.ACTION_UP:
+				setParticleToMove(null);
+				finger.setVisible(false);
+		}
+	}
+
+	public synchronized void setGravity(float x, float y, float z) {
+		gravity.set(-x, y + Math.abs(z)); // y is backwards, so here is positive
+		gravity.scale(0.2f);
+	}
+
+	public synchronized boolean isFinished() {
+		return livesLeft <= 0;
+	}
+
+	public synchronized Result getResult() {
+		return new Result(scoreDate, level, score, webType);
 	}
 
 	private void setupWebObserver(Web web) {
@@ -235,7 +298,7 @@ public class Game implements Savable {
 		messageLevelUp();
 	}
 
-	public void messageSpidersLeft() {
+	private void messageSpidersLeft() {
 		Message msg = messageHandler.obtainMessage();
 		Bundle b = new Bundle();
 		b.putString(MessageFields.Type.toString(), MessageType.SpidersLeft.toString());
@@ -244,7 +307,7 @@ public class Game implements Savable {
 		messageHandler.sendMessage(msg);
 	}
 
-	public void messageLivesLeft() {
+	private void messageLivesLeft() {
 		Message msg = messageHandler.obtainMessage();
 		Bundle b = new Bundle();
 		b.putString(MessageFields.Type.toString(), MessageType.LivesLeft.toString());
@@ -253,7 +316,7 @@ public class Game implements Savable {
 		messageHandler.sendMessage(msg);
 	}
 
-	public void messageScore() {
+	private void messageScore() {
 		Message msg = messageHandler.obtainMessage();
 		Bundle b = new Bundle();
 		b.putString(MessageFields.Type.toString(), MessageType.Score.toString());
@@ -262,7 +325,7 @@ public class Game implements Savable {
 		messageHandler.sendMessage(msg);
 	}
 
-	public void messageLevelUp() {
+	private void messageLevelUp() {
 		Message msg = messageHandler.obtainMessage();
 		Bundle b = new Bundle();
 		b.putString(MessageFields.Type.toString(), MessageType.LevelUp.toString());
@@ -271,32 +334,13 @@ public class Game implements Savable {
 		messageHandler.sendMessage(msg);
 	}
 
-	public void messageGameOver() {
+	private void messageGameOver() {
 		Message msg = messageHandler.obtainMessage();
 		Bundle b = new Bundle();
 		b.putString(MessageFields.Type.toString(), MessageType.GameOver.toString());
 		b.putInt(MessageFields.Data.toString(), score);
 		msg.setData(b);
 		messageHandler.sendMessage(msg);
-	}
-
-	public boolean isFinished() {
-		return livesLeft <= 0;
-	}
-
-	public void setSurfaceSize(int width, int height) {
-		canvasWidth = width;
-		canvasHeight = height;
-
-		// calculate scale and game area
-		int min = Math.min(width, height);
-		canvasScale = min * 0.5f;
-
-		float x = (float) width / (float) min;
-		float y = (float) height / (float) min;
-		gameArea = new RectF(-x, -y, x, y);
-
-		setupBackground(width, height);
 	}
 
 	private void setupBackground(int width, int height) {
@@ -310,12 +354,12 @@ public class Game implements Savable {
 		WebFactory.generateBackground(backgroundCanvas, backgroundBitmap, backgroundColor, backgroundColor, Color.BLACK, canvasScale, webType);
 	}
 
-	public void frame(Canvas canvas, float dt) {
+	public synchronized void frame(Canvas canvas, float dt) {
 		update(dt);
 		draw(canvas);
 	}
 
-	public void draw(Canvas canvas) {
+	private void draw(Canvas canvas) {
 		canvas.save();
 
 		canvas.drawBitmap(backgroundBitmap, 0, 0, null);
@@ -339,7 +383,7 @@ public class Game implements Savable {
 		messageScore();
 	}
 
-	public void update(float dt) {
+	private void update(float dt) {
 
 		web.update(dt, gravity, gameArea);
 
@@ -391,58 +435,11 @@ public class Game implements Savable {
 		}
 	}
 
-	void moveParticle(Vector2 move) {
+	private void moveParticle(Vector2 move) {
 		if (movedParticle != null) {
 			Vector2 oldPos = new Vector2(movedParticle.getPos());
 			oldPos.add(move);
 			movedParticle.setPinnedPos(oldPos);
 		}
-	}
-
-	public void onTouchEvent(MotionEvent motionEvent) {
-		/*
-		web.destroyNearestSpring(motionEvent.getX() - canvasWidth / 2, motionEvent.getY() - canvasHeight / 2, 3.0f);
-		*/
-		switch (motionEvent.getAction()) {
-			case MotionEvent.ACTION_DOWN:
-				Vector2 click = new Vector2(
-						motionEvent.getX() - canvasWidth / 2,
-						motionEvent.getY() - canvasHeight / 2);
-				click.scale(1.0f / canvasScale);
-
-				Particle pulled = web.selectParticleInRange(click, finger.getRadius());
-				if (pulled != null) {
-					for (Spider spider : spiders) {
-						spider.onParticlePulled(pulled);
-					}
-					finger.setPos(click);
-					finger.setVisible(true);
-					setParticleToMove(pulled);
-				}
-				moveStart = click;
-				break;
-			case MotionEvent.ACTION_MOVE:
-				Vector2 move = new Vector2(
-						motionEvent.getX() - canvasWidth / 2,
-						motionEvent.getY() - canvasHeight / 2);
-				move.scale(1.0f / canvasScale);
-				moveParticle(Vector2.sub(move, moveStart));
-				finger.setPos(move);
-				moveStart = move;
-				break;
-			case MotionEvent.ACTION_CANCEL:
-			case MotionEvent.ACTION_UP:
-				setParticleToMove(null);
-				finger.setVisible(false);
-		}
-	}
-
-	public void setGravity(float x, float y, float z) {
-		gravity.set(-x, y + Math.abs(z)); // y is backwards, so here is positive
-		gravity.scale(0.2f);
-	}
-
-	public Result getResult() {
-		return new Result(scoreDate, level, score, webType);
 	}
 }

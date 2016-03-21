@@ -51,7 +51,6 @@ import pl.reticular.ttw.utils.ResultsTableHelper;
 
 public class GameActivity extends AppCompatActivity implements SensorEventListener {
 
-	private GameSurfaceView gameSurfaceView;
 	private TextView topLeftText;
 	private TextView topRightText;
 
@@ -63,7 +62,11 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
 
 	private SharedPreferences preferences;
 
-	Handler handler;
+	private Game game;
+
+	private Handler handler;
+
+	private Runnable highScoreLauncher;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -77,7 +80,7 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
 
 		setContentView(R.layout.layout_game);
 
-		gameSurfaceView = (GameSurfaceView) findViewById(R.id.view_game);
+		GameSurfaceView gameSurfaceView = (GameSurfaceView) findViewById(R.id.view_game);
 		topLeftText = (TextView) findViewById(R.id.text_top_left);
 		topRightText = (TextView) findViewById(R.id.text_top_right);
 
@@ -99,18 +102,26 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
 
 		if (continueGame) {
 			// last game will be played
-			gameSurfaceView.setGame(lastGame);
+			game = lastGame;
 		} else {
 			if (lastGame != null) {
 				saveResult(lastGame.getResult());
 			}
 
 			//create new game
-			Game newGame = new Game(this, new MessageHandler(this), WebType.Round5x6);
-			gameSurfaceView.setGame(newGame);
+			game = new Game(this, new MessageHandler(this), WebType.Round5x6);
 		}
 
+		gameSurfaceView.setGame(game);
+
 		handler = new Handler();
+
+		highScoreLauncher = new Runnable() {
+			@Override
+			public void run() {
+				launchHighScores();
+			}
+		};
 	}
 
 	@Override
@@ -123,8 +134,6 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
 					accelerometerSensor,
 					SensorManager.SENSOR_DELAY_UI);
 		}
-
-		gameSurfaceView.getThread().resume();
 	}
 
 	@Override
@@ -136,8 +145,6 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
 			sensorManager.unregisterListener(this);
 			sensorAvailable = false;
 		}
-
-		gameSurfaceView.getThread().pause();
 	}
 
 	@Override
@@ -150,14 +157,13 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
 		super.onStop();
 		Log.i(getClass().getName(), "onStop");
 
-		Game game = gameSurfaceView.getGame();
 		if (game.isFinished()) {
 			finish();
 		} else {
 			saveLastGame(game);
 		}
 
-		handler.removeCallbacksAndMessages(null);
+		handler.removeCallbacks(highScoreLauncher);
 	}
 
 	private void saveLastGame(Game game) {
@@ -249,14 +255,9 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
 		toast.setGravity(Gravity.CENTER, 0, 0);
 		toast.show();
 
-		saveResult(gameSurfaceView.getThread().getGame().getResult());
+		saveResult(game.getResult());
 
-		handler.postDelayed(new Runnable() {
-			@Override
-			public void run() {
-				launchHighScores();
-			}
-		}, 2000);
+		handler.postDelayed(highScoreLauncher, 2000);
 	}
 
 	private void displayLevelUp(int level) {
@@ -289,7 +290,7 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
 			z = 0.0f;
 		}
 
-		gameSurfaceView.getThread().getGame().setGravity(x, y, z);
+		game.setGravity(x, y, z);
 	}
 
 	@Override

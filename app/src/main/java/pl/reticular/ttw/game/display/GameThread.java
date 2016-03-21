@@ -30,36 +30,26 @@ public class GameThread implements Runnable {
 
 	private static final int maxFPS = 30;
 
-	private SurfaceHolder surfaceHolder;
+	private final SurfaceHolder surfaceHolder;
 
 	private Thread thread;
 
 	private Game game;
 
-	private boolean enabled;
+	private boolean running;
 
-	public GameThread(SurfaceHolder surfaceHolder) {
+	public GameThread(SurfaceHolder surfaceHolder, Game game) {
 		this.surfaceHolder = surfaceHolder;
+		this.game = game;
 
-		game = null;
-		thread = null;
-		enabled = false;
+		thread = new Thread(this);
+		running = true;
+		thread.start();
 	}
 
-	public synchronized void pause() {
-		terminate();
-	}
-
-	public synchronized void resume() {
-		if (thread == null) {
-			thread = new Thread(this);
-			thread.start();
-		}
-	}
-
-	public synchronized void terminate() {
+	public void terminate() {
 		if (thread != null) {
-			thread.interrupt();
+			running = false;
 
 			boolean retry = true;
 			while (retry) {
@@ -75,19 +65,17 @@ public class GameThread implements Runnable {
 
 	@Override
 	public void run() {
-		boolean running = true;
-
 		while (running) {
 			long timeStart = System.currentTimeMillis();
-			if (enabled && surfaceHolder.getSurface().isValid()) {
-				Canvas c = surfaceHolder.lockCanvas(null);
 
+			Canvas canvas = surfaceHolder.lockCanvas(null);
+			if (canvas != null) {
 				try {
-					frame(c);
+					game.frame(canvas, 1.0f / maxFPS);
 				} catch (Exception e) {
 					Log.e(getClass().getName(), Log.getStackTraceString(e));
 				} finally {
-					surfaceHolder.unlockCanvasAndPost(c);
+					surfaceHolder.unlockCanvasAndPost(canvas);
 				}
 			}
 
@@ -101,29 +89,7 @@ public class GameThread implements Runnable {
 					Thread.sleep(10);
 				}
 			} catch (InterruptedException e) {
-				running = false;
 			}
 		}
-	}
-
-	private synchronized void frame(Canvas canvas) {
-		game.frame(canvas, 1.0f / maxFPS);
-	}
-
-	/**
-	 * Must be called once
-	 */
-	public synchronized void setGame(Game g) {
-		if (game == null) {
-			game = g;
-		}
-	}
-
-	public synchronized void setEnabled(Boolean e) {
-		enabled = e;
-	}
-
-	public synchronized Game getGame() {
-		return game;
 	}
 }

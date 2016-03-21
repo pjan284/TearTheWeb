@@ -31,6 +31,8 @@ import pl.reticular.ttw.game.Game;
 
 public class GameSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
 
+	private Game game;
+
 	private GameThread gameThread;
 
 	public GameSurfaceView(Context context, AttributeSet attrs) {
@@ -42,8 +44,6 @@ public class GameSurfaceView extends SurfaceView implements SurfaceHolder.Callba
 
 			SurfaceHolder holder = getHolder();
 			holder.addCallback(this);
-
-			gameThread = new GameThread(holder);
 		}
 	}
 
@@ -52,34 +52,37 @@ public class GameSurfaceView extends SurfaceView implements SurfaceHolder.Callba
 		return gameThread;
 	}
 
-	public Game getGame() {
-		return gameThread.getGame();
-	}
-
 	public void setGame(Game game) {
-		gameThread.setGame(game);
+		this.game = game;
 	}
 
 	@Override
 	public boolean onTouchEvent(@NonNull MotionEvent motionEvent) {
-		gameThread.getGame().onTouchEvent(motionEvent);
+		game.onTouchEvent(motionEvent);
 		//return super.onTouchEvent(motionEvent);
 		return true;
 	}
 
-	public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-		Log.i(getClass().getName(), "surfaceChanged");
-		gameThread.getGame().setSurfaceSize(width, height);
-		gameThread.setEnabled(true);
-	}
-
+	@Override
 	public void surfaceCreated(SurfaceHolder holder) {
 		Log.i(getClass().getName(), "surfaceCreated");
 		setWillNotDraw(false);
 	}
 
+	@Override
+	public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+		Log.i(getClass().getName(), "surfaceChanged");
+		game.setSurfaceSize(width, height);
+		if (gameThread != null) {
+			gameThread.terminate();
+		}
+		gameThread = new GameThread(getHolder(), game);
+	}
+
+	@Override
 	public void surfaceDestroyed(SurfaceHolder holder) {
 		Log.i(getClass().getName(), "surfaceDestroyed");
 		gameThread.terminate();
+		gameThread = null;
 	}
 }
