@@ -16,17 +16,14 @@
 
         <ImageButton
             android:id="@+id/button_start_more"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
-            android:layout_marginBottom="16dp"
-            android:layout_marginLeft="16dp"
-            android:layout_marginRight="16dp"
-            android:layout_marginTop="16dp"
             android:background="@null"
             android:contentDescription="@string/start_more"
+            android:scaleType="centerInside"
             android:src="@drawable/ic_action_overflow" />
 
         <TextView
