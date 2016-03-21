@@ -81,7 +81,7 @@ public class StartActivity extends AppCompatActivity
 		});
 
 		preferences = PrefsHelper.getPrefs(this);
-		continueButton.setEnabled(preferences.contains(Prefs.LastGame.toString()));
+		setContinueButtonVisibility(preferences.contains(Prefs.LastGame.toString()));
 	}
 
 	@Override
@@ -98,6 +98,17 @@ public class StartActivity extends AppCompatActivity
 		Log.i(getClass().getName(), "onStop");
 
 		preferences.unregisterOnSharedPreferenceChangeListener(this);
+	}
+
+	private void setContinueButtonVisibility(Boolean visible) {
+		// To be sure
+		continueButton.setEnabled(visible);
+
+		if (visible) {
+			continueButton.setVisibility(View.VISIBLE);
+		} else {
+			continueButton.setVisibility(View.GONE);
+		}
 	}
 
 	private void showMoreMenu(View v) {
@@ -157,7 +168,7 @@ public class StartActivity extends AppCompatActivity
 	@Override
 	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
 		if (Prefs.valueOf(key) == Prefs.LastGame) {
-			continueButton.setEnabled(preferences.contains(Prefs.LastGame.toString()));
+			setContinueButtonVisibility(preferences.contains(Prefs.LastGame.toString()));
 		}
 	}
 }

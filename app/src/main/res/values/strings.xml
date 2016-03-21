@@ -8,9 +8,9 @@
     <string name="title_activity_webs">Choose web</string>
     <string name="start_tear_the_web">Tear The Web</string>
     <string name="start_spiders">(and get rid of spiders)</string>
-    <string name="start_new_game">&gt; New Game &lt;</string>
-    <string name="start_continue_game">&gt; Continue &lt;</string>
-    <string name="start_high_scores">&gt; High Scores &lt;</string>
+    <string name="start_new_game">New Game</string>
+    <string name="start_continue_game">Continue</string>
+    <string name="start_high_scores">High Scores</string>
     <string name="start_more">more</string>
     <string name="game_spiders">spiders: %d</string>
     <string name="game_lives">lives: %d</string>
