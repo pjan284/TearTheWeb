@@ -81,7 +81,6 @@ public class StartActivity extends AppCompatActivity
 		});
 
 		preferences = PrefsHelper.getPrefs(this);
-		setContinueButtonVisibility(preferences.contains(Prefs.LastGame.toString()));
 	}
 
 	@Override
@@ -90,6 +89,8 @@ public class StartActivity extends AppCompatActivity
 		Log.i(getClass().getName(), "onStart");
 
 		preferences.registerOnSharedPreferenceChangeListener(this);
+
+		setContinueButtonVisibility(preferences.contains(Prefs.LastGame.toString()));
 	}
 
 	@Override
