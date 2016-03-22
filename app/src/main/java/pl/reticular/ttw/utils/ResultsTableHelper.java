@@ -23,7 +23,7 @@ import android.content.ContentValues;
 import android.database.sqlite.SQLiteDatabase;
 import android.provider.BaseColumns;
 
-import pl.reticular.ttw.game.meta.MetaData;
+import pl.reticular.ttw.game.model.meta.MetaData;
 
 public class ResultsTableHelper {
 	public static final String TABLE_NAME = "Results";

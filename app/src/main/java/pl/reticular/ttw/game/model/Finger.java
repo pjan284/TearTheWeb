@@ -1,4 +1,4 @@
-package pl.reticular.ttw.game;
+package pl.reticular.ttw.game.model;
 
 /*
  * Copyright (C) 2016 Piotr Jankowski
@@ -19,10 +19,6 @@ package pl.reticular.ttw.game;
  * along with Tear The Web. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -33,7 +29,6 @@ public class Finger implements Savable {
 	private boolean bitten;
 	private float timeToHeal;
 
-	private Paint paint;
 	private Vector2 position;
 	private float radius;
 	private Particle selectedParticle;
@@ -45,13 +40,10 @@ public class Finger implements Savable {
 		TimeToHeal
 	}
 
-	Finger() {
+	public Finger() {
 		bitten = false;
 		timeToHeal = 0.0f;
 
-		paint = new Paint();
-		paint.setStyle(Paint.Style.STROKE);
-		paint.setStrokeWidth(3.0f);
 		position = null;
 		radius = 0.1f;
 		selectedParticle = null;
@@ -63,9 +55,6 @@ public class Finger implements Savable {
 		bitten = json.getBoolean(Keys.Bitten.toString());
 		timeToHeal = (float) json.getDouble(Keys.TimeToHeal.toString());
 
-		paint = new Paint();
-		paint.setStyle(Paint.Style.STROKE);
-		paint.setStrokeWidth(3.0f);
 		position = null;
 		radius = 0.1f;
 		selectedParticle = null;
@@ -82,12 +71,6 @@ public class Finger implements Savable {
 		return state;
 	}
 
-	public void draw(Canvas canvas, float scale) {
-		if (position != null) {
-			canvas.drawCircle(position.X * scale, position.Y * scale, radius * scale, paint);
-		}
-	}
-
 	public void update(float dt) {
 		if (bitten) {
 			timeToHeal -= dt;
@@ -101,11 +84,8 @@ public class Finger implements Savable {
 	public void setBitten(boolean bitten) {
 		this.bitten = bitten;
 		if (this.bitten) {
-			paint.setColor(Color.RED);
 			timeToHeal = healTime;
 			cancelDragging();
-		} else {
-			paint.setColor(Color.YELLOW);
 		}
 	}
 
@@ -117,12 +97,20 @@ public class Finger implements Savable {
 		return bitten;
 	}
 
-	public void startTracking(Vector2 touch, Web web, SpiderManager spiderManager) {
+	public Vector2 getPosition() {
+		return position;
+	}
+
+	public float getRadius() {
+		return radius;
+	}
+
+	public void startTracking(Vector2 touch, Web web, SpiderSet spiderSet) {
 		position = touch;
 		if (!bitten) {
 			Particle particle = web.selectParticleInRange(touch, radius);
 			if (particle != null) {
-				spiderManager.onParticlePulled(particle);
+				spiderSet.onParticlePulled(particle);
 				selectedParticle = particle;
 				selectedParticle.setPinned(true);
 			}

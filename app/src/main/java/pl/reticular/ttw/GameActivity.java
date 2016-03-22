@@ -40,10 +40,11 @@ import org.json.JSONObject;
 
 import java.lang.ref.WeakReference;
 
-import pl.reticular.ttw.game.Game;
-import pl.reticular.ttw.game.display.GameSurfaceView;
-import pl.reticular.ttw.game.meta.MetaData;
-import pl.reticular.ttw.game.meta.MetaDataMsg;
+import pl.reticular.ttw.game.control.GameControl;
+import pl.reticular.ttw.game.display.system.GameSurfaceView;
+import pl.reticular.ttw.game.model.Game;
+import pl.reticular.ttw.game.model.meta.MetaData;
+import pl.reticular.ttw.game.model.meta.MetaDataMsg;
 import pl.reticular.ttw.utils.DBHelper;
 import pl.reticular.ttw.utils.Prefs;
 import pl.reticular.ttw.utils.PrefsHelper;
@@ -62,7 +63,7 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
 
 	private SharedPreferences preferences;
 
-	private Game game;
+	private GameControl gameControl;
 
 	private Handler handler;
 
@@ -100,6 +101,7 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
 			}
 		}
 
+		Game game;
 		if (continueGame) {
 			// last game will be played
 			game = lastGame;
@@ -109,10 +111,12 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
 			}
 
 			//create new game
-			game = new Game(this, new MessageHandler(this));
+			game = new Game();
 		}
 
-		gameSurfaceView.setGame(game);
+		gameControl = new GameControl(this, new MessageHandler(this), game);
+
+		gameSurfaceView.setGameControl(gameControl);
 
 		handler = new Handler();
 
@@ -157,10 +161,10 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
 		super.onStop();
 		Log.i(getClass().getName(), "onStop");
 
-		if (game.isFinished()) {
+		if (gameControl.isFinished()) {
 			finish();
 		} else {
-			saveLastGame(game);
+			saveLastGame(gameControl.getGame());
 		}
 
 		handler.removeCallbacks(highScoreLauncher);
@@ -195,7 +199,7 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
 			try {
 				String data = preferences.getString(Prefs.LastGame.toString(), "{}");
 				JSONObject lastGameData = new JSONObject(data);
-				return new Game(this, new MessageHandler(this), lastGameData);
+				return new Game(lastGameData);
 			} catch (JSONException e) {
 				clearLastGameData();
 			}
@@ -296,7 +300,7 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
 			z = 0.0f;
 		}
 
-		game.setGravity(x, y, z);
+		gameControl.setGravity(x, y, z);
 	}
 
 	@Override

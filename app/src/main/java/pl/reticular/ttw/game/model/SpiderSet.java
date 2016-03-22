@@ -1,4 +1,4 @@
-package pl.reticular.ttw.game;
+package pl.reticular.ttw.game.model;
 
 /*
  * Copyright (C) 2016 Piotr Jankowski
@@ -19,7 +19,6 @@ package pl.reticular.ttw.game;
  * along with Tear The Web. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import android.graphics.Canvas;
 import android.graphics.RectF;
 
 import org.json.JSONArray;
@@ -32,7 +31,7 @@ import java.util.LinkedList;
 import pl.reticular.ttw.utils.Savable;
 import pl.reticular.ttw.utils.Vector2;
 
-public class SpiderManager implements Savable {
+public class SpiderSet implements Savable {
 
 	public interface SpiderObserver {
 		void onSpiderOut(Spider spider);
@@ -46,13 +45,11 @@ public class SpiderManager implements Savable {
 		Spiders,
 	}
 
-	public SpiderManager(SpiderObserver observer) {
-		this.observer = observer;
+	public SpiderSet() {
 		spiders = new LinkedList<>();
 	}
 
-	public SpiderManager(JSONObject json, Web web, SpiderObserver observer) throws JSONException {
-		this.observer = observer;
+	public SpiderSet(JSONObject json, Web web) throws JSONException {
 		spiders = new LinkedList<>();
 		JSONArray spidersData = json.getJSONArray(Keys.Spiders.toString());
 		for (int i = 0; i < spidersData.length(); i++) {
@@ -76,11 +73,19 @@ public class SpiderManager implements Savable {
 		return state;
 	}
 
+	public void setObserver(SpiderObserver observer) {
+		this.observer = observer;
+	}
+
 	public void populate(int number, Web web) {
 		spiders.clear();
 		for (int i = 0; i < number; i++) {
 			spiders.add(new Spider(web));
 		}
+	}
+
+	public LinkedList<Spider> getSpiders() {
+		return spiders;
 	}
 
 	public int getNumSpiders() {
@@ -96,12 +101,6 @@ public class SpiderManager implements Savable {
 	public void onSpringUnAvailable(Spring spring) {
 		for (Spider spider : spiders) {
 			spider.onSpringUnAvailable(spring);
-		}
-	}
-
-	public void draw(Canvas canvas, float canvasScale) {
-		for (Spider spider : spiders) {
-			spider.draw(canvas, canvasScale);
 		}
 	}
 

@@ -1,4 +1,4 @@
-package pl.reticular.ttw.game.meta;
+package pl.reticular.ttw.game.model.meta;
 
 /*
  * Copyright (C) 2016 Piotr Jankowski

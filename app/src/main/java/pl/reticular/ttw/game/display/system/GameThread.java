@@ -1,4 +1,4 @@
-package pl.reticular.ttw.game.display;
+package pl.reticular.ttw.game.display.system;
 
 /*
  * Copyright (C) 2016 Piotr Jankowski
@@ -23,7 +23,7 @@ import android.graphics.Canvas;
 import android.util.Log;
 import android.view.SurfaceHolder;
 
-import pl.reticular.ttw.game.Game;
+import pl.reticular.ttw.game.control.GameControl;
 
 
 public class GameThread implements Runnable {
@@ -34,13 +34,13 @@ public class GameThread implements Runnable {
 
 	private Thread thread;
 
-	private Game game;
+	private GameControl gameControl;
 
 	private boolean running;
 
-	public GameThread(SurfaceHolder surfaceHolder, Game game) {
+	public GameThread(SurfaceHolder surfaceHolder, GameControl gameControl) {
 		this.surfaceHolder = surfaceHolder;
-		this.game = game;
+		this.gameControl = gameControl;
 
 		thread = new Thread(this);
 		running = true;
@@ -71,7 +71,7 @@ public class GameThread implements Runnable {
 			Canvas canvas = surfaceHolder.lockCanvas(null);
 			if (canvas != null) {
 				try {
-					game.frame(canvas, 1.0f / maxFPS);
+					gameControl.frame(canvas, 1.0f / maxFPS);
 				} catch (Exception e) {
 					Log.e(getClass().getName(), Log.getStackTraceString(e));
 				} finally {

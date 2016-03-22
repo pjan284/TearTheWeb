@@ -1,4 +1,4 @@
-package pl.reticular.ttw.game;
+package pl.reticular.ttw.game.model;
 
 /*
  * Copyright (C) 2016 Piotr Jankowski
@@ -19,20 +19,15 @@ package pl.reticular.ttw.game;
  * along with Tear The Web. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import pl.reticular.ttw.game.graph.Node;
+import pl.reticular.ttw.game.model.graph.Node;
 import pl.reticular.ttw.utils.Vector2;
 
 public class Particle extends Node {
 	private Vector2 pos, prevPos;
 	private boolean pinned;
-	private Paint paint;
 
 	private static final float dampingFactor = 0.99f;
 
@@ -47,10 +42,6 @@ public class Particle extends Node {
 		pos = new Vector2(x, y);
 		prevPos = new Vector2(x, y);
 		this.pinned = pinned;
-
-		paint = new Paint();
-		paint.setAntiAlias(true);
-		resetColor();
 	}
 
 	public Particle(JSONObject json) throws JSONException {
@@ -58,10 +49,6 @@ public class Particle extends Node {
 		pos = new Vector2(json.getJSONObject(Keys.Pos.toString()));
 		prevPos = new Vector2(json.getJSONObject(Keys.PrevPos.toString()));
 		pinned = json.getBoolean(Keys.Pinned.toString());
-
-		paint = new Paint();
-		paint.setAntiAlias(true);
-		resetColor();
 	}
 
 	@Override
@@ -73,24 +60,6 @@ public class Particle extends Node {
 		state.put(Keys.Pinned.toString(), pinned);
 
 		return state;
-	}
-
-	public void setColor(int color) {
-		paint.setColor(color);
-	}
-
-	public void resetColor() {
-		if (pinned) {
-			paint.setColor(Color.BLUE);
-		} else {
-			paint.setColor(Color.GREEN);
-		}
-	}
-
-	public void draw(Canvas canvas, float scale) {
-		if (pinned) {
-			canvas.drawCircle(pos.X * scale, pos.Y * scale, 3.0f, paint);
-		}
 	}
 
 	public void update(float dt, Vector2 gravity) {

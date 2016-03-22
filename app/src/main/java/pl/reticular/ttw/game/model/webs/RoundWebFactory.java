@@ -1,4 +1,4 @@
-package pl.reticular.ttw.game.webs;
+package pl.reticular.ttw.game.model.webs;
 
 /*
  * Copyright (C) 2016 Piotr Jankowski
@@ -26,51 +26,55 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Shader;
 
-import pl.reticular.ttw.game.Particle;
-import pl.reticular.ttw.game.Web;
+import pl.reticular.ttw.game.model.Particle;
+import pl.reticular.ttw.game.model.Web;
 
-public class RectWebFactory {
-	public static Web createRectWeb(float left, float top, float right, float bottom, int xGaps, int yGaps, float spacing) {
+public class RoundWebFactory {
+	public static Web createRoundWeb(float xs, float ys, float rMin, float rMax, int cylinders, int sectors, float spacing) {
 		Web web = new Web();
 
-		float width = right - left;
-		float height = bottom - top;
+		float baseAngle = (float) Math.PI * (-0.5f + 1.0f / sectors);
 
-		float xs = width / xGaps;
-		float ys = height / yGaps;
+		for (int c = 0; c < cylinders; c++) {
 
-		Particle previousKeyParticles[] = null;
+			for (int s = 0; s < sectors; s++) {
+				boolean pinned = (c == cylinders - 1);
 
-		for (int y = 0; y <= yGaps; y++) {
+				float angle = baseAngle + s * ((float) Math.PI * 2.0f / sectors);
+				float r = rMin + c * ((rMax - rMin) / (cylinders - 1));
 
-			Particle keyParticles[] = new Particle[xGaps + 1];
-
-			for (int x = 0; x <= xGaps; x++) {
-				boolean pinned = (x == 0 || y == 0 || x == xGaps || y == xGaps);
-
-				Particle p = new Particle(left + (x * xs), top + (y * ys), pinned);
+				Particle p = new Particle(xs + r * (float) Math.cos(angle),
+						ys + r * (float) Math.sin(angle),
+						pinned);
 				web.insert(p);
-				keyParticles[x] = p;
+			}
+		}
 
-				// horizontal chain
-				if (x > 0 && y != 0 && y != yGaps) {
-					web.addNormalizedChain(p, keyParticles[x - 1], spacing);
+		for (int c = 0; c < cylinders; c++) {
+
+			for (int s = 0; s < sectors; s++) {
+				if (s != 0) {
+					web.addNormalizedChain((Particle) web.getNode(c * sectors + s),
+							(Particle) web.getNode(c * sectors + s - 1),
+							spacing);
 				}
 
-				// vertical chain
-				if (y > 0 && x != 0 && x != xGaps) {
-					web.addNormalizedChain(p, previousKeyParticles[x], spacing);
+				if (c != 0) {
+					web.addNormalizedChain((Particle) web.getNode(c * sectors + s),
+							(Particle) web.getNode((c - 1) * sectors + s),
+							spacing);
 				}
 			}
-
-			previousKeyParticles = keyParticles;
+			web.addNormalizedChain((Particle) web.getNode((c + 1) * sectors - 1),
+					(Particle) web.getNode(c * sectors),
+					spacing);
 		}
 
 		return web;
 	}
 
 	public static void generateBackground(Canvas canvas, Bitmap backgroundBitmap, int backgroundColor, int areaColor, int borderColor,
-	                                      float scale, float left, float top, float right, float bottom) {
+	                                      float scale, float xs, float ys, float rMax) {
 
 		canvas.drawColor(backgroundColor);
 
@@ -95,8 +99,8 @@ public class RectWebFactory {
 
 		canvas.drawRect(canvas.getClipBounds(), backgroundPaint);
 
-		canvas.drawRect(left * scale, top * scale, right * scale, bottom * scale, areaPaint);
+		canvas.drawCircle(xs * scale, ys * scale, rMax * scale, areaPaint);
 
-		canvas.drawRect(left * scale, top * scale, right * scale, bottom * scale, borderPaint);
+		canvas.drawCircle(xs * scale, ys * scale, rMax * scale, borderPaint);
 	}
 }

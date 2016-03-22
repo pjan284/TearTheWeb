@@ -1,4 +1,4 @@
-package pl.reticular.ttw.game;
+package pl.reticular.ttw.game.model;
 
 /*
  * Copyright (C) 2016 Piotr Jankowski
@@ -19,9 +19,6 @@ package pl.reticular.ttw.game;
  * along with Tear The Web. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.RectF;
 import android.support.v4.util.Pair;
 import android.util.Log;
@@ -32,9 +29,9 @@ import org.json.JSONObject;
 import java.util.LinkedList;
 import java.util.Random;
 
-import pl.reticular.ttw.game.graph.Edge;
-import pl.reticular.ttw.game.graph.Graph;
-import pl.reticular.ttw.game.graph.Node;
+import pl.reticular.ttw.game.model.graph.Edge;
+import pl.reticular.ttw.game.model.graph.Graph;
+import pl.reticular.ttw.game.model.graph.Node;
 import pl.reticular.ttw.utils.Modulo;
 import pl.reticular.ttw.utils.Savable;
 import pl.reticular.ttw.utils.Vector2;
@@ -61,8 +58,6 @@ public class Spider implements Savable {
 	private static final float SPEED_NORMAL = 0.25f;
 	private static final float SPEED_FURIOUS = 0.5f;
 
-	private Paint paint;
-
 	private Random generator;
 
 	/**
@@ -84,16 +79,9 @@ public class Spider implements Savable {
 
 	private static final int fingerDetectDistance = 15;
 
-	private float imageScale;
-
 	private Vector2 position;
 	private Vector2 velocity;
 	private float rotation;
-
-	private float legs[];
-	private float jaws[];
-	private RectF body;
-	private RectF head;
 
 	private static Vector2 upVector = new Vector2(0.0f, 1.0f);
 
@@ -125,8 +113,6 @@ public class Spider implements Savable {
 		position = new Vector2();
 		velocity = new Vector2();
 		rotation = 0;
-
-		createDisplayData();
 	}
 
 	public Spider(Graph graph, JSONObject json) throws JSONException {
@@ -154,8 +140,6 @@ public class Spider implements Savable {
 		if (mode == MODE_ATTACK) {
 			mode = MODE_RANDOM;
 		}
-
-		createDisplayData();
 	}
 
 	public JSONObject toJSON() throws JSONException {
@@ -173,48 +157,6 @@ public class Spider implements Savable {
 		state.put(Keys.Rotation.toString(), rotation);
 
 		return state;
-	}
-
-	private void createDisplayData() {
-		paint = new Paint();
-		paint.setColor(Color.rgb(255, 0, 0));
-		paint.setStrokeWidth(2.0f);
-
-		legs = new float[]{
-				0, 0, 8, -8,
-				8, -8, 6, -19,
-
-				0, 0, 12, -4,
-				12, -4, 16, -16,
-
-				0, 0, 8, 8,
-				8, 8, 6, 19,
-
-				0, 0, 12, 4,
-				12, 4, 16, 16,
-
-				0, 0, -8, -8,
-				-8, -8, -6, -19,
-
-				0, 0, -12, -4,
-				-12, -4, -16, -16,
-
-				0, 0, -8, 8,
-				-8, 8, -6, 19,
-
-				0, 0, -12, 4,
-				-12, 4, -16, 16,
-		};
-
-		jaws = new float[]{
-				0, -4, -2, -10,
-				0, -4, 2, -10,
-		};
-
-		body = new RectF(-4.0f, 12.0f, 4.0f, 0.0f);
-		head = new RectF(-3.0f, 0.0f, 3.0f, -8.0f);
-
-		imageScale = 0.003f;
 	}
 
 	private Pair<Particle, Spring> nextTargetAtRandom() {
@@ -258,28 +200,6 @@ public class Spider implements Savable {
 		target = pair.first;
 		spring = pair.second;
 		springPercent = 0.0f;
-	}
-
-	public void draw(Canvas canvas, float scale) {
-		float x = position.X * scale;
-		float y = position.Y * scale;
-
-		canvas.save();
-		canvas.translate(x, y);
-		canvas.rotate(-rotation, 0, 0);
-		float s = imageScale * scale;
-		canvas.scale(s, s);
-
-		//canvas.drawCircle(0, 0, 4.0f, paint);
-
-		canvas.drawOval(body, paint);
-		canvas.drawOval(head, paint);
-
-		canvas.drawLines(jaws, 0, jaws.length, paint);
-
-		canvas.drawLines(legs, 0, legs.length, paint);
-
-		canvas.restore();
 	}
 
 	public void update(float dt, Vector2 gravity, RectF gameArea) throws OutException {
@@ -327,6 +247,10 @@ public class Spider implements Savable {
 
 	public Vector2 getPosition() {
 		return position;
+	}
+
+	public float getRotation() {
+		return rotation;
 	}
 
 	private void switchToRandom() {

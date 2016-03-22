@@ -1,4 +1,4 @@
-package pl.reticular.ttw.game.display;
+package pl.reticular.ttw.game.display.system;
 
 /*
  * Copyright (C) 2016 Piotr Jankowski
@@ -27,11 +27,11 @@ import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
-import pl.reticular.ttw.game.Game;
+import pl.reticular.ttw.game.control.GameControl;
 
 public class GameSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
 
-	private Game game;
+	private GameControl gameControl;
 
 	private GameThread gameThread;
 
@@ -47,18 +47,13 @@ public class GameSurfaceView extends SurfaceView implements SurfaceHolder.Callba
 		}
 	}
 
-
-	public GameThread getThread() {
-		return gameThread;
-	}
-
-	public void setGame(Game game) {
-		this.game = game;
+	public void setGameControl(GameControl gameControl) {
+		this.gameControl = gameControl;
 	}
 
 	@Override
 	public boolean onTouchEvent(@NonNull MotionEvent motionEvent) {
-		game.onTouchEvent(motionEvent);
+		gameControl.onTouchEvent(motionEvent);
 		//return super.onTouchEvent(motionEvent);
 		return true;
 	}
@@ -72,11 +67,11 @@ public class GameSurfaceView extends SurfaceView implements SurfaceHolder.Callba
 	@Override
 	public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
 		Log.i(getClass().getName(), "surfaceChanged");
-		game.setSurfaceSize(width, height);
+		gameControl.setSurfaceSize(width, height);
 		if (gameThread != null) {
 			gameThread.terminate();
 		}
-		gameThread = new GameThread(getHolder(), game);
+		gameThread = new GameThread(getHolder(), gameControl);
 	}
 
 	@Override

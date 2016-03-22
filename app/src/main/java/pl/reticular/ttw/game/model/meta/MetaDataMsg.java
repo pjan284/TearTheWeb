@@ -1,4 +1,4 @@
-package pl.reticular.ttw.game.webs;
+package pl.reticular.ttw.game.model.meta;
 
 /*
  * Copyright (C) 2016 Piotr Jankowski
@@ -19,13 +19,17 @@ package pl.reticular.ttw.game.webs;
  * along with Tear The Web. If not, see <http://www.gnu.org/licenses/>.
  */
 
-public enum WebType {
-	Round5x6,
-	Round4x7,
-	Round5x7,
-	Round4x8,
-	Rect5x5,
-	Rect6x6,
-	Rect7x7,
-	Rect8x8,
+public class MetaDataMsg {
+	public enum Fields {
+		Reason,
+		Data
+	}
+
+	public enum Reason {
+		Init,
+		LivesDecreased,
+		ScoreChanged,
+		LevelUp,
+		GameOver
+	}
 }

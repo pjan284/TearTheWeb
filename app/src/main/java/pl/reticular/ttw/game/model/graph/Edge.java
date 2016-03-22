@@ -1,4 +1,4 @@
-package pl.reticular.ttw.game.graph;
+package pl.reticular.ttw.game.model.graph;
 
 /*
  * Copyright (C) 2016 Piotr Jankowski

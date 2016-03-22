@@ -1,4 +1,4 @@
-package pl.reticular.ttw.game.webs;
+package pl.reticular.ttw.game.model.webs;
 
 /*
  * Copyright (C) 2016 Piotr Jankowski
@@ -22,7 +22,7 @@ package pl.reticular.ttw.game.webs;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 
-import pl.reticular.ttw.game.Web;
+import pl.reticular.ttw.game.model.Web;
 
 public class WebFactory {
 	public static Web createWeb(WebType webType) {

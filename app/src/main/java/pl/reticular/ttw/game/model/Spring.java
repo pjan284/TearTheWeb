@@ -1,4 +1,4 @@
-package pl.reticular.ttw.game;
+package pl.reticular.ttw.game.model;
 
 /*
  * Copyright (C) 2016 Piotr Jankowski
@@ -19,23 +19,18 @@ package pl.reticular.ttw.game;
  * along with Tear The Web. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.RectF;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import pl.reticular.ttw.game.graph.Edge;
-import pl.reticular.ttw.game.graph.Node;
+import pl.reticular.ttw.game.model.graph.Edge;
+import pl.reticular.ttw.game.model.graph.Node;
 import pl.reticular.ttw.utils.Vector2;
 
 public class Spring extends Edge {
 	private float defaultLength;
 	private Particle particle1, particle2;
-
-	private Paint paint;
 
 	private static final float tearFactor = 3.5f;
 	private static final float tensionFactor = 0.9f;
@@ -53,11 +48,6 @@ public class Spring extends Edge {
 		this.particle2 = (Particle) node2;
 
 		defaultLength = length() * tensionFactor;
-
-		paint = new Paint();
-		paint.setAntiAlias(true);
-		paint.setStrokeWidth(3.0f);
-		paint.setColor(Color.GRAY);
 	}
 
 	public Spring(Web web, JSONObject json) throws JSONException {
@@ -66,11 +56,6 @@ public class Spring extends Edge {
 		this.particle2 = (Particle) node2;
 
 		defaultLength = (float) json.getDouble(Keys.DefaultLength.toString());
-
-		paint = new Paint();
-		paint.setAntiAlias(true);
-		paint.setStrokeWidth(3.0f);
-		paint.setColor(Color.GRAY);
 	}
 
 	public JSONObject toJSON() throws JSONException {
@@ -114,13 +99,6 @@ public class Spring extends Edge {
 		//try to restore original length
 		p1.add(diffX, diffY);
 		p2.add(-diffX, -diffY);
-	}
-
-	public void draw(Canvas canvas, float scale) {
-		Vector2 p1 = particle1.getPos();
-		Vector2 p2 = particle2.getPos();
-
-		canvas.drawLine(p1.X * scale, p1.Y * scale, p2.X * scale, p2.Y * scale, paint);
 	}
 
 	public boolean scissors(float px, float py, float sense) {

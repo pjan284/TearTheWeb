@@ -1,4 +1,4 @@
-package pl.reticular.ttw.game.graph;
+package pl.reticular.ttw.game.model.graph;
 
 /*
  * Copyright (C) 2016 Piotr Jankowski
@@ -117,6 +117,14 @@ public abstract class Graph implements Savable {
 
 	public void insert(Node v) {
 		nodes.add(v);
+	}
+
+	public ArrayList<Node> getNodes() {
+		return nodes;
+	}
+
+	public ArrayList<Edge> getEdges() {
+		return edges;
 	}
 
 	public void print() {

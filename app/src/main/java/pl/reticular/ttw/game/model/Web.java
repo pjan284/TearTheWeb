@@ -1,4 +1,4 @@
-package pl.reticular.ttw.game;
+package pl.reticular.ttw.game.model;
 
 /*
  * Copyright (C) 2016 Piotr Jankowski
@@ -19,7 +19,6 @@ package pl.reticular.ttw.game;
  * along with Tear The Web. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import android.graphics.Canvas;
 import android.graphics.RectF;
 
 import org.json.JSONException;
@@ -27,9 +26,9 @@ import org.json.JSONObject;
 
 import java.util.Iterator;
 
-import pl.reticular.ttw.game.graph.Edge;
-import pl.reticular.ttw.game.graph.Graph;
-import pl.reticular.ttw.game.graph.Node;
+import pl.reticular.ttw.game.model.graph.Edge;
+import pl.reticular.ttw.game.model.graph.Graph;
+import pl.reticular.ttw.game.model.graph.Node;
 import pl.reticular.ttw.utils.Vector2;
 
 public class Web extends Graph {
@@ -125,16 +124,6 @@ public class Web extends Graph {
 				it.remove();
 			}
 		}
-	}
-
-	public void draw(Canvas canvas, float scale) {
-		for (Edge edge : edges) {
-			((Spring) edge).draw(canvas, scale);
-		}
-
-//		for (Node node : nodes) {
-//			((Particle) node).draw(canvas, scale);
-//		}
 	}
 
 	public Particle selectParticleInRange(Vector2 clickPos, float r) {
