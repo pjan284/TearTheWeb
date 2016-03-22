@@ -36,6 +36,7 @@ import pl.reticular.ttw.game.meta.MetaData;
 import pl.reticular.ttw.game.meta.MetaDataHelper;
 import pl.reticular.ttw.game.webs.WebFactory;
 import pl.reticular.ttw.game.webs.WebType;
+import pl.reticular.ttw.utils.CanvasHelper;
 import pl.reticular.ttw.utils.Savable;
 import pl.reticular.ttw.utils.Vector2;
 
@@ -49,11 +50,7 @@ public class Game implements Savable, Web.WebObserver, SpiderManager.SpiderObser
 		Meta
 	}
 
-	private int canvasHeight = 1;
-	private int canvasWidth = 1;
-	private float canvasScale = 1.0f;
-
-	private RectF gameArea;
+	private CanvasHelper canvasHelper;
 
 	private Bitmap backgroundBitmap;
 
@@ -70,6 +67,8 @@ public class Game implements Savable, Web.WebObserver, SpiderManager.SpiderObser
 	public Game(Context context, Handler messageHandler) {
 		this.context = context;
 
+		canvasHelper = new CanvasHelper();
+
 		meta = new MetaDataHelper(messageHandler);
 
 		web = WebFactory.createWeb(getWebType(meta.getMetaData().getLevel()));
@@ -85,6 +84,8 @@ public class Game implements Savable, Web.WebObserver, SpiderManager.SpiderObser
 
 	public Game(Context context, Handler messageHandler, JSONObject json) throws JSONException {
 		this.context = context;
+
+		canvasHelper = new CanvasHelper();
 
 		meta = new MetaDataHelper(new MetaData(json.getJSONObject(Keys.Meta.toString())), messageHandler);
 
@@ -114,43 +115,26 @@ public class Game implements Savable, Web.WebObserver, SpiderManager.SpiderObser
 	}
 
 	public synchronized void setSurfaceSize(int width, int height) {
-		canvasWidth = width;
-		canvasHeight = height;
-
-		// calculate scale and game area
-		int min = Math.min(width, height);
-		canvasScale = min * 0.5f;
-
-		float x = (float) width / (float) min;
-		float y = (float) height / (float) min;
-		gameArea = new RectF(-x, -y, x, y);
+		canvasHelper.setSize(width, height);
 
 		WebType webType = getWebType(meta.getMetaData().getLevel());
-		setupBackground(width, height, webType);
+		setupBackground(webType);
 	}
 
 	public synchronized void frame(Canvas canvas, float dt) {
-		update(dt);
-		draw(canvas);
+		update(dt, gravity, canvasHelper.getArea());
+		draw(canvas, canvasHelper.getScale());
 	}
 
 	public synchronized void onTouchEvent(MotionEvent motionEvent) {
 		Vector2 touch;
 		switch (motionEvent.getAction()) {
 			case MotionEvent.ACTION_DOWN:
-				touch = new Vector2(
-						motionEvent.getX() - canvasWidth / 2,
-						motionEvent.getY() - canvasHeight / 2);
-				touch.scale(1.0f / canvasScale);
-
+				touch = canvasHelper.transform(motionEvent.getX(), motionEvent.getY());
 				finger.startTracking(touch, web, spiderManager);
 				break;
 			case MotionEvent.ACTION_MOVE:
-				touch = new Vector2(
-						motionEvent.getX() - canvasWidth / 2,
-						motionEvent.getY() - canvasHeight / 2);
-				touch.scale(1.0f / canvasScale);
-
+				touch = canvasHelper.transform(motionEvent.getX(), motionEvent.getY());
 				finger.continueTracking(touch);
 				break;
 			case MotionEvent.ACTION_CANCEL:
@@ -195,22 +179,22 @@ public class Game implements Savable, Web.WebObserver, SpiderManager.SpiderObser
 		}
 	}
 
-	private void setupBackground(int width, int height, WebType wt) {
+	private void setupBackground(WebType wt) {
 		// read background image
 		Bitmap bgBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.web);
 
 		@SuppressWarnings("deprecation")
 		int bgColor = context.getResources().getColor(R.color.colorBackground);
 
-		this.backgroundBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+		backgroundBitmap = Bitmap.createBitmap(canvasHelper.getWidth(), canvasHelper.getHeight(), Bitmap.Config.ARGB_8888);
 
-		Canvas bgCanvas = new Canvas(this.backgroundBitmap);
-		bgCanvas.translate(width / 2, height / 2);
+		Canvas bgCanvas = new Canvas(backgroundBitmap);
+		canvasHelper.translate(bgCanvas);
 
-		WebFactory.generateBackground(bgCanvas, bgBitmap, bgColor, bgColor, Color.BLACK, canvasScale, wt);
+		WebFactory.generateBackground(bgCanvas, bgBitmap, bgColor, bgColor, Color.BLACK, canvasHelper.getScale(), wt);
 	}
 
-	private void update(float dt) {
+	private void update(float dt, Vector2 gravity, RectF gameArea) {
 		web.update(dt, gravity, gameArea);
 
 		spiderManager.update(dt, gravity, gameArea);
@@ -230,18 +214,18 @@ public class Game implements Savable, Web.WebObserver, SpiderManager.SpiderObser
 		}
 	}
 
-	private void draw(Canvas canvas) {
+	private void draw(Canvas canvas, float scale) {
 		canvas.save();
 
 		canvas.drawBitmap(backgroundBitmap, 0, 0, null);
 
-		canvas.translate(canvasWidth / 2, canvasHeight / 2);
+		canvasHelper.translate(canvas);
 
-		web.draw(canvas, canvasScale);
+		web.draw(canvas, scale);
 
-		spiderManager.draw(canvas, canvasScale);
+		spiderManager.draw(canvas, scale);
 
-		finger.draw(canvas, canvasScale);
+		finger.draw(canvas, scale);
 
 		canvas.restore();
 	}
@@ -254,7 +238,7 @@ public class Game implements Savable, Web.WebObserver, SpiderManager.SpiderObser
 		web.setObserver(this);
 
 		backgroundBitmap.recycle();
-		setupBackground(canvasWidth, canvasHeight, webType);
+		setupBackground(webType);
 
 		spiderManager.populate(meta.getMetaData().getLevel(), web);
 	}
