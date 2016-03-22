@@ -25,15 +25,15 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.RectF;
-import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
 import android.view.MotionEvent;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import pl.reticular.ttw.R;
+import pl.reticular.ttw.game.meta.MetaData;
+import pl.reticular.ttw.game.meta.MetaDataHelper;
 import pl.reticular.ttw.game.webs.WebFactory;
 import pl.reticular.ttw.game.webs.WebType;
 import pl.reticular.ttw.utils.Savable;
@@ -44,29 +44,10 @@ public class Game implements Savable, Web.WebObserver, SpiderManager.SpiderObser
 
 	private enum Keys {
 		Web,
-		WebType,
 		Finger,
 		SpiderManager,
-		LivesLeft,
-		Level,
-		Score,
-		ScoreDate
+		Meta
 	}
-
-	public enum MessageFields {
-		Type,
-		Data
-	}
-
-	public enum MessageType {
-		LivesLeft,
-		SpidersLeft,
-		Score,
-		LevelUp,
-		GameOver
-	}
-
-	private Handler messageHandler;
 
 	private int canvasHeight = 1;
 	private int canvasWidth = 1;
@@ -80,71 +61,42 @@ public class Game implements Savable, Web.WebObserver, SpiderManager.SpiderObser
 
 	private Web web;
 
-	private WebType webType;
-
 	private Vector2 moveStart;
 	private Particle movedParticle;
 
-	private int livesLeft;
-	private int level;
-	private int score;
-	private long scoreDate;
+	private MetaDataHelper meta;
 
 	private SpiderManager spiderManager;
 
 	private Vector2 gravity;
 
-	public Game(Context context, Handler messageHandler, WebType webType) {
+	public Game(Context context, Handler messageHandler) {
 		this.context = context;
-		this.messageHandler = messageHandler;
-		this.webType = webType;
 
-		livesLeft = 1;
-		level = 1;
-		score = 0;
-		scoreDate = System.currentTimeMillis();
+		meta = new MetaDataHelper(messageHandler);
 
-		web = WebFactory.createWeb(webType);
+		web = WebFactory.createWeb(getWebType(meta.getMetaData().getLevel()));
 		web.setObserver(this);
 
 		finger = new Finger();
 
 		spiderManager = new SpiderManager(this);
-		spiderManager.populate(level, web);
-
-		messageLivesLeft();
-		messageSpidersLeft();
-		messageScore();
+		spiderManager.populate(meta.getMetaData().getLevel(), web);
 
 		gravity = new Vector2(0.0f, 1.0f);
 	}
 
 	public Game(Context context, Handler messageHandler, JSONObject json) throws JSONException {
 		this.context = context;
-		this.messageHandler = messageHandler;
 
-		livesLeft = json.getInt(Keys.LivesLeft.toString());
-
-		level = json.getInt(Keys.Level.toString());
-		score = json.getInt(Keys.Score.toString());
-		scoreDate = json.getLong(Keys.ScoreDate.toString());
+		meta = new MetaDataHelper(new MetaData(json.getJSONObject(Keys.Meta.toString())), messageHandler);
 
 		web = new Web(json.getJSONObject(Keys.Web.toString()));
 		web.setObserver(this);
 
-		try {
-			webType = WebType.valueOf(json.getString(Keys.WebType.toString()));
-		} catch (IllegalArgumentException e) {
-			webType = WebType.Round4x8;
-		}
-
 		finger = new Finger(json.getJSONObject(Keys.Finger.toString()));
 
 		spiderManager = new SpiderManager(json.getJSONObject(Keys.SpiderManager.toString()), web, this);
-
-		messageLivesLeft();
-		messageSpidersLeft();
-		messageScore();
 
 		gravity = new Vector2(0.0f, 1.0f);
 	}
@@ -155,15 +107,11 @@ public class Game implements Savable, Web.WebObserver, SpiderManager.SpiderObser
 		JSONObject state = new JSONObject();
 
 		state.put(Keys.Web.toString(), web.toJSON());
-		state.put(Keys.WebType.toString(), webType.toString());
 		state.put(Keys.Finger.toString(), finger.toJSON());
 
 		state.put(Keys.SpiderManager.toString(), spiderManager.toJSON());
 
-		state.put(Keys.LivesLeft.toString(), livesLeft);
-		state.put(Keys.Level.toString(), level);
-		state.put(Keys.Score.toString(), score);
-		state.put(Keys.ScoreDate.toString(), scoreDate);
+		state.put(Keys.Meta.toString(), meta.getMetaData().toJSON());
 
 		return state;
 	}
@@ -180,7 +128,13 @@ public class Game implements Savable, Web.WebObserver, SpiderManager.SpiderObser
 		float y = (float) height / (float) min;
 		gameArea = new RectF(-x, -y, x, y);
 
-		setupBackground(width, height);
+		WebType webType = getWebType(meta.getMetaData().getLevel());
+		setupBackground(width, height, webType);
+	}
+
+	public synchronized void frame(Canvas canvas, float dt) {
+		update(dt);
+		draw(canvas);
 	}
 
 	public synchronized void onTouchEvent(MotionEvent motionEvent) {
@@ -214,6 +168,7 @@ public class Game implements Savable, Web.WebObserver, SpiderManager.SpiderObser
 			case MotionEvent.ACTION_UP:
 				setParticleToMove(null);
 				finger.setVisible(false);
+				break;
 		}
 	}
 
@@ -223,94 +178,69 @@ public class Game implements Savable, Web.WebObserver, SpiderManager.SpiderObser
 	}
 
 	public synchronized boolean isFinished() {
-		return livesLeft <= 0;
+		return meta.getMetaData().isFinished();
 	}
 
-	public synchronized Result getResult() {
-		return new Result(scoreDate, level, score, webType);
+	public synchronized MetaData getMetaData() {
+		return meta.getMetaData();
 	}
 
-	private void levelUp() {
-		level += 1;
-		livesLeft = level;
+	@Override
+	public void onSpringBroken(Spring spring) {
+		if (!isFinished()) {
+			setParticleToMove(null);
+			meta.addScore(1);
+		}
 
-		webType = WebType.values()[(webType.ordinal() + 1) % WebType.values().length];
-
-		web = WebFactory.createWeb(webType);
-		web.setObserver(this);
-
-		backgroundBitmap.recycle();
-		setupBackground(canvasWidth, canvasHeight);
-
-		finger = new Finger();
-
-		spiderManager.populate(level, web);
-
-		messageLivesLeft();
-		messageSpidersLeft();
-		messageScore();
-		messageLevelUp();
+		spiderManager.onSpringUnAvailable(spring);
 	}
 
-	private void messageSpidersLeft() {
-		Message msg = messageHandler.obtainMessage();
-		Bundle b = new Bundle();
-		b.putString(MessageFields.Type.toString(), MessageType.SpidersLeft.toString());
-		b.putInt(MessageFields.Data.toString(), spiderManager.getNumSpiders());
-		msg.setData(b);
-		messageHandler.sendMessage(msg);
+	@Override
+	public void onSpringOut(Spring spring) {
+		spiderManager.onSpringUnAvailable(spring);
 	}
 
-	private void messageLivesLeft() {
-		Message msg = messageHandler.obtainMessage();
-		Bundle b = new Bundle();
-		b.putString(MessageFields.Type.toString(), MessageType.LivesLeft.toString());
-		b.putInt(MessageFields.Data.toString(), livesLeft);
-		msg.setData(b);
-		messageHandler.sendMessage(msg);
+	@Override
+	public void onSpiderOut(Spider spider) {
+		if (!isFinished()) {
+			meta.addScore(10);
+		}
 	}
 
-	private void messageScore() {
-		Message msg = messageHandler.obtainMessage();
-		Bundle b = new Bundle();
-		b.putString(MessageFields.Type.toString(), MessageType.Score.toString());
-		b.putInt(MessageFields.Data.toString(), score);
-		msg.setData(b);
-		messageHandler.sendMessage(msg);
-	}
+	private void setupBackground(int width, int height, WebType wt) {
+		// read background image
+		Bitmap bgBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.web);
 
-	private void messageLevelUp() {
-		Message msg = messageHandler.obtainMessage();
-		Bundle b = new Bundle();
-		b.putString(MessageFields.Type.toString(), MessageType.LevelUp.toString());
-		b.putInt(MessageFields.Data.toString(), level);
-		msg.setData(b);
-		messageHandler.sendMessage(msg);
-	}
-
-	private void messageGameOver() {
-		Message msg = messageHandler.obtainMessage();
-		Bundle b = new Bundle();
-		b.putString(MessageFields.Type.toString(), MessageType.GameOver.toString());
-		b.putInt(MessageFields.Data.toString(), score);
-		msg.setData(b);
-		messageHandler.sendMessage(msg);
-	}
-
-	private void setupBackground(int width, int height) {
-		// create background image
-		Bitmap backgroundBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.web);
 		@SuppressWarnings("deprecation")
-		int backgroundColor = context.getResources().getColor(R.color.colorBackground);
+		int bgColor = context.getResources().getColor(R.color.colorBackground);
+
 		this.backgroundBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-		Canvas backgroundCanvas = new Canvas(this.backgroundBitmap);
-		backgroundCanvas.translate(width / 2, height / 2);
-		WebFactory.generateBackground(backgroundCanvas, backgroundBitmap, backgroundColor, backgroundColor, Color.BLACK, canvasScale, webType);
+
+		Canvas bgCanvas = new Canvas(this.backgroundBitmap);
+		bgCanvas.translate(width / 2, height / 2);
+
+		WebFactory.generateBackground(bgCanvas, bgBitmap, bgColor, bgColor, Color.BLACK, canvasScale, wt);
 	}
 
-	public synchronized void frame(Canvas canvas, float dt) {
-		update(dt);
-		draw(canvas);
+	private void update(float dt) {
+		web.update(dt, gravity, gameArea);
+
+		spiderManager.update(dt, gravity, gameArea);
+
+		if (spiderManager.getNumSpiders() == 0) {
+			levelUp();
+		}
+
+		finger.update(dt);
+
+		//check game over conditions
+		if (!isFinished() && !finger.isPoisoned()) {
+			if (spiderManager.areAnyInContactWith(finger)) {
+				finger.setPoisoned(true);
+				setParticleToMove(null);
+				meta.die();
+			}
+		}
 	}
 
 	private void draw(Canvas canvas) {
@@ -327,41 +257,6 @@ public class Game implements Savable, Web.WebObserver, SpiderManager.SpiderObser
 		finger.draw(canvas, canvasScale);
 
 		canvas.restore();
-	}
-
-	private void addScore(int add) {
-		score += add * level;
-		scoreDate = System.currentTimeMillis();
-		messageScore();
-	}
-
-	private void update(float dt) {
-
-		web.update(dt, gravity, gameArea);
-
-		spiderManager.update(dt, gravity, gameArea);
-
-		if (spiderManager.getNumSpiders() == 0) {
-			levelUp();
-		}
-
-		finger.update(dt);
-
-		//check game over conditions
-		if (!isFinished() && !finger.isPoisoned()) {
-			if (spiderManager.areAnyInContactWith(finger)) {
-				finger.setPoisoned(true);
-				livesLeft--;
-				messageLivesLeft();
-				if (isFinished()) {
-					messageGameOver();
-				}
-			}
-
-			if (finger.isPoisoned()) {
-				setParticleToMove(null);
-			}
-		}
 	}
 
 	private void setParticleToMove(Particle particle) {
@@ -384,26 +279,21 @@ public class Game implements Savable, Web.WebObserver, SpiderManager.SpiderObser
 		}
 	}
 
-	@Override
-	public void onSpringBroken(Spring spring) {
-		if (!isFinished()) {
-			setParticleToMove(null);
-			addScore(1);
-		}
+	private void levelUp() {
+		meta.levelUp();
 
-		spiderManager.onSpringUnAvailable(spring);
+		WebType webType = getWebType(meta.getMetaData().getLevel());
+		web = WebFactory.createWeb(webType);
+		web.setObserver(this);
+
+		backgroundBitmap.recycle();
+		setupBackground(canvasWidth, canvasHeight, webType);
+
+		spiderManager.populate(meta.getMetaData().getLevel(), web);
 	}
 
-	@Override
-	public void onSpringOut(Spring spring) {
-		spiderManager.onSpringUnAvailable(spring);
-	}
-
-	@Override
-	public void onSpiderOut(Spider spider) {
-		if (!isFinished()) {
-			messageSpidersLeft();
-			addScore(10);
-		}
+	private WebType getWebType(int level) {
+		//levels start from 1, enums from 0
+		return WebType.values()[(level - 1) % WebType.values().length];
 	}
 }

@@ -41,9 +41,9 @@ import org.json.JSONObject;
 import java.lang.ref.WeakReference;
 
 import pl.reticular.ttw.game.Game;
-import pl.reticular.ttw.game.Result;
 import pl.reticular.ttw.game.display.GameSurfaceView;
-import pl.reticular.ttw.game.webs.WebType;
+import pl.reticular.ttw.game.meta.MetaData;
+import pl.reticular.ttw.game.meta.MetaDataMsg;
 import pl.reticular.ttw.utils.DBHelper;
 import pl.reticular.ttw.utils.Prefs;
 import pl.reticular.ttw.utils.PrefsHelper;
@@ -105,11 +105,11 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
 			game = lastGame;
 		} else {
 			if (lastGame != null) {
-				saveResult(lastGame.getResult());
+				saveResult(lastGame.getMetaData());
 			}
 
 			//create new game
-			game = new Game(this, new MessageHandler(this), WebType.Round5x6);
+			game = new Game(this, new MessageHandler(this));
 		}
 
 		gameSurfaceView.setGame(game);
@@ -175,14 +175,14 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
 		}
 	}
 
-	private void saveResult(Result result) {
+	private void saveResult(MetaData metaData) {
 		// clear last game data
 		clearLastGameData();
 
 		// but preserve score
 		DBHelper dbHelper = new DBHelper(this);
 		SQLiteDatabase db = dbHelper.getWritableDatabase();
-		ResultsTableHelper.insert(db, result);
+		ResultsTableHelper.insert(db, metaData);
 		dbHelper.close();
 	}
 
@@ -216,25 +216,31 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
 			GameActivity gameActivity = gameActivityWeakReference.get();
 			Bundle data = msg.getData();
 			if (gameActivity != null) {
-				switch (Game.MessageType.valueOf(data.getString(Game.MessageFields.Type.toString()))) {
-					case LivesLeft:
-						int livesLeft = data.getInt(Game.MessageFields.Data.toString());
-						gameActivity.displayLivesLeft(livesLeft);
-						break;
-					case SpidersLeft:
-						break;
-					case Score:
-						int score = data.getInt(Game.MessageFields.Data.toString());
-						gameActivity.displayScore(score);
-						break;
-					case GameOver:
-						int gameScore = data.getInt(Game.MessageFields.Data.toString());
-						gameActivity.gameOver(gameScore);
-						break;
-					case LevelUp:
-						int level = data.getInt(Game.MessageFields.Data.toString());
-						gameActivity.displayLevelUp(level);
-						break;
+				try {
+					MetaDataMsg.Reason reason = MetaDataMsg.Reason.valueOf(data.getString(MetaDataMsg.Fields.Reason.toString()));
+					JSONObject json = new JSONObject(data.getString(MetaDataMsg.Fields.Data.toString()));
+					MetaData metaData = new MetaData(json);
+					switch (reason) {
+						case Init:
+							gameActivity.displayLivesLeft(metaData.getLives());
+							gameActivity.displayScore(metaData.getScore());
+							break;
+						case LivesDecreased:
+							gameActivity.displayLivesLeft(metaData.getLives());
+							break;
+						case ScoreChanged:
+							gameActivity.displayScore(metaData.getScore());
+							break;
+						case GameOver:
+							gameActivity.displayLivesLeft(metaData.getLives());
+							gameActivity.gameOver(metaData);
+							break;
+						case LevelUp:
+							gameActivity.displayLevelUp(metaData.getLevel());
+							break;
+					}
+				} catch (JSONException e) {
+					e.printStackTrace();
 				}
 			}
 		}
@@ -250,12 +256,12 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
 		topLeftText.setText(String.format(string, score));
 	}
 
-	private void gameOver(int score) {
+	private void gameOver(MetaData metaData) {
 		Toast toast = Toast.makeText(this, R.string.game_game_over, Toast.LENGTH_SHORT);
 		toast.setGravity(Gravity.CENTER, 0, 0);
 		toast.show();
 
-		saveResult(game.getResult());
+		saveResult(metaData);
 
 		handler.postDelayed(highScoreLauncher, 2000);
 	}

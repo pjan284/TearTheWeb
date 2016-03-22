@@ -1,4 +1,4 @@
-package pl.reticular.ttw.game;
+package pl.reticular.ttw.game.meta;
 
 /*
  * Copyright (C) 2016 Piotr Jankowski
@@ -22,28 +22,41 @@ package pl.reticular.ttw.game;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import pl.reticular.ttw.game.webs.WebType;
 import pl.reticular.ttw.utils.Savable;
 
-public class Result implements Savable {
+public class MetaData implements Savable {
 
 	private long date;
 	private int level;
+	private int lives;
 	private int score;
-	private WebType webType;
 
 	public enum Keys {
 		Date,
 		Level,
+		Lives,
 		Score,
-		WebType
 	}
 
-	public Result(long date, int level, int score, WebType webType) {
-		this.date = date;
+	public MetaData() {
+		date = System.currentTimeMillis();
+		level = 1;
+		lives = 1;
+		score = 0;
+	}
+
+	public MetaData(int level, int lives, int score) {
+		this.date = System.currentTimeMillis();
 		this.level = level;
+		this.lives = lives;
 		this.score = score;
-		this.webType = webType;
+	}
+
+	public MetaData(JSONObject json) throws JSONException {
+		date = json.getLong(Keys.Date.toString());
+		level = json.getInt(Keys.Level.toString());
+		lives = json.getInt(Keys.Lives.toString());
+		score = json.getInt(Keys.Score.toString());
 	}
 
 	@Override
@@ -52,8 +65,8 @@ public class Result implements Savable {
 
 		json.put(Keys.Date.toString(), date);
 		json.put(Keys.Level.toString(), level);
+		json.put(Keys.Lives.toString(), lives);
 		json.put(Keys.Score.toString(), score);
-		json.put(Keys.WebType.toString(), webType.toString());
 
 		return json;
 	}
@@ -66,12 +79,29 @@ public class Result implements Savable {
 		return level;
 	}
 
+	public int getLives() {
+		return lives;
+	}
+
 	public int getScore() {
 		return score;
 	}
 
-	public WebType getWebType() {
-		return webType;
+	public MetaData levelUp() {
+		int newLevel = level + 1;
+		return new MetaData(newLevel, newLevel, score);
+	}
+
+	public MetaData addScore(int add) {
+		return new MetaData(level, lives, score + add * level);
+	}
+
+	public MetaData die() {
+		return new MetaData(level, lives - 1, score);
+	}
+
+	public boolean isFinished() {
+		return lives <= 0;
 	}
 }
 
