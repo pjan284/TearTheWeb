@@ -30,12 +30,8 @@ import android.os.Handler;
 import android.os.Message;
 import android.view.MotionEvent;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.Iterator;
-import java.util.LinkedList;
 
 import pl.reticular.ttw.R;
 import pl.reticular.ttw.game.webs.WebFactory;
@@ -43,14 +39,14 @@ import pl.reticular.ttw.game.webs.WebType;
 import pl.reticular.ttw.utils.Savable;
 import pl.reticular.ttw.utils.Vector2;
 
-public class Game implements Savable {
+public class Game implements Savable, Web.WebObserver, SpiderManager.SpiderObserver {
 	private Context context;
 
 	private enum Keys {
 		Web,
 		WebType,
 		Finger,
-		Spiders,
+		SpiderManager,
 		LivesLeft,
 		Level,
 		Score,
@@ -94,7 +90,7 @@ public class Game implements Savable {
 	private int score;
 	private long scoreDate;
 
-	private LinkedList<Spider> spiders;
+	private SpiderManager spiderManager;
 
 	private Vector2 gravity;
 
@@ -109,14 +105,12 @@ public class Game implements Savable {
 		scoreDate = System.currentTimeMillis();
 
 		web = WebFactory.createWeb(webType);
-		setupWebObserver(web);
+		web.setObserver(this);
 
 		finger = new Finger();
 
-		spiders = new LinkedList<>();
-		for (int i = 0; i < level; i++) {
-			spiders.add(new Spider(web));
-		}
+		spiderManager = new SpiderManager(this);
+		spiderManager.populate(level, web);
 
 		messageLivesLeft();
 		messageSpidersLeft();
@@ -136,7 +130,7 @@ public class Game implements Savable {
 		scoreDate = json.getLong(Keys.ScoreDate.toString());
 
 		web = new Web(json.getJSONObject(Keys.Web.toString()));
-		setupWebObserver(web);
+		web.setObserver(this);
 
 		try {
 			webType = WebType.valueOf(json.getString(Keys.WebType.toString()));
@@ -146,13 +140,7 @@ public class Game implements Savable {
 
 		finger = new Finger(json.getJSONObject(Keys.Finger.toString()));
 
-		spiders = new LinkedList<>();
-		JSONArray spidersData = json.getJSONArray(Keys.Spiders.toString());
-		for (int i = 0; i < spidersData.length(); i++) {
-			JSONObject spiderState = spidersData.getJSONObject(i);
-			Spider spider = new Spider(web, spiderState);
-			spiders.add(spider);
-		}
+		spiderManager = new SpiderManager(json.getJSONObject(Keys.SpiderManager.toString()), web, this);
 
 		messageLivesLeft();
 		messageSpidersLeft();
@@ -170,14 +158,7 @@ public class Game implements Savable {
 		state.put(Keys.WebType.toString(), webType.toString());
 		state.put(Keys.Finger.toString(), finger.toJSON());
 
-		JSONArray spidersData = new JSONArray();
-
-		for (Spider spider : spiders) {
-			JSONObject spiderState = spider.toJSON();
-			spidersData.put(spiderState);
-		}
-
-		state.put(Keys.Spiders.toString(), spidersData);
+		state.put(Keys.SpiderManager.toString(), spiderManager.toJSON());
 
 		state.put(Keys.LivesLeft.toString(), livesLeft);
 		state.put(Keys.Level.toString(), level);
@@ -212,9 +193,8 @@ public class Game implements Savable {
 
 				Particle pulled = web.selectParticleInRange(click, finger.getRadius());
 				if (pulled != null) {
-					for (Spider spider : spiders) {
-						spider.onParticlePulled(pulled);
-					}
+					spiderManager.onParticlePulled(pulled);
+
 					finger.setPos(click);
 					finger.setVisible(true);
 					setParticleToMove(pulled);
@@ -250,29 +230,6 @@ public class Game implements Savable {
 		return new Result(scoreDate, level, score, webType);
 	}
 
-	private void setupWebObserver(Web web) {
-		web.setObserver(new WebObserver() {
-			@Override
-			public void onSpringBroken(Spring spring) {
-				if (!isFinished()) {
-					setParticleToMove(null);
-					addScore(1);
-				}
-
-				for (Spider spider : spiders) {
-					spider.onSpringUnAvailable(spring);
-				}
-			}
-
-			@Override
-			public void onSpringOut(Spring spring) {
-				for (Spider spider : spiders) {
-					spider.onSpringUnAvailable(spring);
-				}
-			}
-		});
-	}
-
 	private void levelUp() {
 		level += 1;
 		livesLeft = level;
@@ -280,17 +237,14 @@ public class Game implements Savable {
 		webType = WebType.values()[(webType.ordinal() + 1) % WebType.values().length];
 
 		web = WebFactory.createWeb(webType);
-		setupWebObserver(web);
+		web.setObserver(this);
 
 		backgroundBitmap.recycle();
 		setupBackground(canvasWidth, canvasHeight);
 
 		finger = new Finger();
 
-		spiders = new LinkedList<>();
-		for (int i = 0; i < level; i++) {
-			spiders.add(new Spider(web));
-		}
+		spiderManager.populate(level, web);
 
 		messageLivesLeft();
 		messageSpidersLeft();
@@ -302,7 +256,7 @@ public class Game implements Savable {
 		Message msg = messageHandler.obtainMessage();
 		Bundle b = new Bundle();
 		b.putString(MessageFields.Type.toString(), MessageType.SpidersLeft.toString());
-		b.putInt(MessageFields.Data.toString(), spiders.size());
+		b.putInt(MessageFields.Data.toString(), spiderManager.getNumSpiders());
 		msg.setData(b);
 		messageHandler.sendMessage(msg);
 	}
@@ -368,9 +322,7 @@ public class Game implements Savable {
 
 		web.draw(canvas, canvasScale);
 
-		for (Spider spider : spiders) {
-			spider.draw(canvas, canvasScale);
-		}
+		spiderManager.draw(canvas, canvasScale);
 
 		finger.draw(canvas, canvasScale);
 
@@ -387,29 +339,18 @@ public class Game implements Savable {
 
 		web.update(dt, gravity, gameArea);
 
-		Iterator<Spider> it = spiders.iterator();
-		while (it.hasNext()) {
-			Spider spider = it.next();
-			try {
-				spider.update(dt, gravity, gameArea);
-			} catch (Spider.OutException e) {
-				if (!isFinished()) {
-					it.remove();
-					messageSpidersLeft();
-					addScore(10);
-				}
-			}
-		}
+		spiderManager.update(dt, gravity, gameArea);
 
-		if (spiders.size() == 0) {
+		if (spiderManager.getNumSpiders() == 0) {
 			levelUp();
 		}
 
 		finger.update(dt);
 
 		//check game over conditions
-		if (!isFinished()) {
-			if (finger.isFreshlyPoisoned(spiders)) {
+		if (!isFinished() && !finger.isPoisoned()) {
+			if (spiderManager.areAnyInContactWith(finger)) {
+				finger.setPoisoned(true);
 				livesLeft--;
 				messageLivesLeft();
 				if (isFinished()) {
@@ -440,6 +381,29 @@ public class Game implements Savable {
 			Vector2 oldPos = new Vector2(movedParticle.getPos());
 			oldPos.add(move);
 			movedParticle.setPinnedPos(oldPos);
+		}
+	}
+
+	@Override
+	public void onSpringBroken(Spring spring) {
+		if (!isFinished()) {
+			setParticleToMove(null);
+			addScore(1);
+		}
+
+		spiderManager.onSpringUnAvailable(spring);
+	}
+
+	@Override
+	public void onSpringOut(Spring spring) {
+		spiderManager.onSpringUnAvailable(spring);
+	}
+
+	@Override
+	public void onSpiderOut(Spider spider) {
+		if (!isFinished()) {
+			messageSpidersLeft();
+			addScore(10);
 		}
 	}
 }

@@ -26,8 +26,6 @@ import android.graphics.Paint;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.LinkedList;
-
 import pl.reticular.ttw.utils.Savable;
 import pl.reticular.ttw.utils.Vector2;
 
@@ -117,20 +115,8 @@ public class Finger implements Savable {
 		}
 	}
 
-	public boolean isFreshlyPoisoned(LinkedList<Spider> spiders) {
-		if (!visible) {
-			return false;
-		}
-		if (poisoned) {
-			return false;   //Already poisoned
-		}
-		for (Spider spider : spiders) {
-			if (Vector2.length(Vector2.sub(pos, spider.getPosition())) < radius) {
-				setPoisoned(true);
-				return true;
-			}
-		}
-		return false;
+	public boolean isInContactWith(Spider spider) {
+		return visible && Vector2.length(Vector2.sub(pos, spider.getPosition())) < radius;
 	}
 
 	public boolean isPoisoned() {

@@ -34,6 +34,12 @@ import pl.reticular.ttw.utils.Vector2;
 
 public class Web extends Graph {
 
+	public interface WebObserver {
+		void onSpringBroken(Spring spring);
+
+		void onSpringOut(Spring spring);
+	}
+
 	protected final int physicsAccuracy = 1;
 
 	private WebObserver observer;
