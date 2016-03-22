@@ -61,9 +61,6 @@ public class Game implements Savable, Web.WebObserver, SpiderManager.SpiderObser
 
 	private Web web;
 
-	private Vector2 moveStart;
-	private Particle movedParticle;
-
 	private MetaDataHelper meta;
 
 	private SpiderManager spiderManager;
@@ -138,36 +135,27 @@ public class Game implements Savable, Web.WebObserver, SpiderManager.SpiderObser
 	}
 
 	public synchronized void onTouchEvent(MotionEvent motionEvent) {
+		Vector2 touch;
 		switch (motionEvent.getAction()) {
 			case MotionEvent.ACTION_DOWN:
-				Vector2 click = new Vector2(
+				touch = new Vector2(
 						motionEvent.getX() - canvasWidth / 2,
 						motionEvent.getY() - canvasHeight / 2);
-				click.scale(1.0f / canvasScale);
+				touch.scale(1.0f / canvasScale);
 
-				Particle pulled = web.selectParticleInRange(click, finger.getRadius());
-				if (pulled != null) {
-					spiderManager.onParticlePulled(pulled);
-
-					finger.setPos(click);
-					finger.setVisible(true);
-					setParticleToMove(pulled);
-				}
-				moveStart = click;
+				finger.startTracking(touch, web, spiderManager);
 				break;
 			case MotionEvent.ACTION_MOVE:
-				Vector2 move = new Vector2(
+				touch = new Vector2(
 						motionEvent.getX() - canvasWidth / 2,
 						motionEvent.getY() - canvasHeight / 2);
-				move.scale(1.0f / canvasScale);
-				moveParticle(Vector2.sub(move, moveStart));
-				finger.setPos(move);
-				moveStart = move;
+				touch.scale(1.0f / canvasScale);
+
+				finger.continueTracking(touch);
 				break;
 			case MotionEvent.ACTION_CANCEL:
 			case MotionEvent.ACTION_UP:
-				setParticleToMove(null);
-				finger.setVisible(false);
+				finger.cancelTracking();
 				break;
 		}
 	}
@@ -188,7 +176,7 @@ public class Game implements Savable, Web.WebObserver, SpiderManager.SpiderObser
 	@Override
 	public void onSpringBroken(Spring spring) {
 		if (!isFinished()) {
-			setParticleToMove(null);
+			finger.cancelTracking();
 			meta.addScore(1);
 		}
 
@@ -234,10 +222,9 @@ public class Game implements Savable, Web.WebObserver, SpiderManager.SpiderObser
 		finger.update(dt);
 
 		//check game over conditions
-		if (!isFinished() && !finger.isPoisoned()) {
+		if (!isFinished() && !finger.isBitten()) {
 			if (spiderManager.areAnyInContactWith(finger)) {
-				finger.setPoisoned(true);
-				setParticleToMove(null);
+				finger.setBitten(true);
 				meta.die();
 			}
 		}
@@ -257,26 +244,6 @@ public class Game implements Savable, Web.WebObserver, SpiderManager.SpiderObser
 		finger.draw(canvas, canvasScale);
 
 		canvas.restore();
-	}
-
-	private void setParticleToMove(Particle particle) {
-		if (particle != null) {
-			movedParticle = particle;
-			movedParticle.setPinned(true);
-		} else {
-			if (movedParticle != null) {
-				movedParticle.setPinned(false);
-				movedParticle = null;
-			}
-		}
-	}
-
-	private void moveParticle(Vector2 move) {
-		if (movedParticle != null) {
-			Vector2 oldPos = new Vector2(movedParticle.getPos());
-			oldPos.add(move);
-			movedParticle.setPinnedPos(oldPos);
-		}
 	}
 
 	private void levelUp() {

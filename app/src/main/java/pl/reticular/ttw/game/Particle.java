@@ -88,7 +88,7 @@ public class Particle extends Node {
 	}
 
 	public void draw(Canvas canvas, float scale) {
-		if (isPinned()) {
+		if (pinned) {
 			canvas.drawCircle(pos.X * scale, pos.Y * scale, 3.0f, paint);
 		}
 	}

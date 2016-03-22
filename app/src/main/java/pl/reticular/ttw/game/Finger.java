@@ -30,96 +30,126 @@ import pl.reticular.ttw.utils.Savable;
 import pl.reticular.ttw.utils.Vector2;
 
 public class Finger implements Savable {
-	private Paint paint;
-	private float radius;
-	private Vector2 pos;
-	private boolean visible;
-	private boolean poisoned;
-	private float poisonedTimeLeft;
+	private boolean bitten;
+	private float timeToHeal;
 
-	private static final float poisonedTime = 1.0f;
+	private Paint paint;
+	private Vector2 position;
+	private float radius;
+	private Particle selectedParticle;
+
+	private static final float healTime = 2.0f;
 
 	private enum Keys {
-		Poisoned,
-		PoisonedTimeLeft
+		Bitten,
+		TimeToHeal
 	}
 
 	Finger() {
+		bitten = false;
+		timeToHeal = 0.0f;
+
 		paint = new Paint();
 		paint.setStyle(Paint.Style.STROKE);
 		paint.setStrokeWidth(3.0f);
+		position = null;
 		radius = 0.1f;
-		pos = new Vector2();
-		poisoned = false;
-		poisonedTimeLeft = 0.0f;
-		setVisible(false);
-		setPoisoned(false);
+		selectedParticle = null;
+
+		setBitten(false);
 	}
 
 	public Finger(JSONObject json) throws JSONException {
+		bitten = json.getBoolean(Keys.Bitten.toString());
+		timeToHeal = (float) json.getDouble(Keys.TimeToHeal.toString());
+
 		paint = new Paint();
 		paint.setStyle(Paint.Style.STROKE);
 		paint.setStrokeWidth(3.0f);
+		position = null;
 		radius = 0.1f;
-		pos = new Vector2();
-		poisoned = json.getBoolean(Keys.Poisoned.toString());
-		poisonedTimeLeft = (float) json.getDouble(Keys.PoisonedTimeLeft.toString());
-		setVisible(false);
-		setPoisoned(false);
+		selectedParticle = null;
+
+		setBitten(false);
 	}
 
 	public JSONObject toJSON() throws JSONException {
 		JSONObject state = new JSONObject();
 
-		state.put(Keys.Poisoned.toString(), poisoned);
-		state.put(Keys.PoisonedTimeLeft.toString(), poisonedTimeLeft);
+		state.put(Keys.Bitten.toString(), bitten);
+		state.put(Keys.TimeToHeal.toString(), timeToHeal);
 
 		return state;
 	}
 
 	public void draw(Canvas canvas, float scale) {
-		if (visible) {
-			canvas.drawCircle(pos.X * scale, pos.Y * scale, radius * scale, paint);
+		if (position != null) {
+			canvas.drawCircle(position.X * scale, position.Y * scale, radius * scale, paint);
 		}
 	}
 
 	public void update(float dt) {
-		if (poisoned) {
-			poisonedTimeLeft -= dt;
+		if (bitten) {
+			timeToHeal -= dt;
 
-			if (poisonedTimeLeft <= 0) {
-				setPoisoned(false);
+			if (timeToHeal <= 0) {
+				setBitten(false);
 			}
 		}
 	}
 
-	public float getRadius() {
-		return radius;
-	}
-
-	public void setPos(Vector2 pos) {
-		this.pos = pos;
-	}
-
-	public void setVisible(boolean visible) {
-		this.visible = visible;
-	}
-
-	public void setPoisoned(boolean poisoned) {
-		this.poisoned = poisoned;
-		if (this.poisoned) {
+	public void setBitten(boolean bitten) {
+		this.bitten = bitten;
+		if (this.bitten) {
 			paint.setColor(Color.RED);
-			poisonedTimeLeft = poisonedTime;
+			timeToHeal = healTime;
+			cancelDragging();
 		} else {
 			paint.setColor(Color.YELLOW);
 		}
 	}
 
 	public boolean isInContactWith(Spider spider) {
-		return visible && Vector2.length(Vector2.sub(pos, spider.getPosition())) < radius;
+		return position != null && Vector2.length(Vector2.sub(position, spider.getPosition())) < radius;
 	}
 
-	public boolean isPoisoned() {
-		return poisoned;
+	public boolean isBitten() {
+		return bitten;
+	}
+
+	public void startTracking(Vector2 touch, Web web, SpiderManager spiderManager) {
+		position = touch;
+		if (!bitten) {
+			Particle particle = web.selectParticleInRange(touch, radius);
+			if (particle != null) {
+				spiderManager.onParticlePulled(particle);
+				selectedParticle = particle;
+				selectedParticle.setPinned(true);
+			}
+		}
+	}
+
+	public void continueTracking(Vector2 touch) {
+		if (position != null) {
+			if (selectedParticle != null) {
+				Vector2 move = Vector2.sub(touch, position);
+				Vector2 particlePos = selectedParticle.getPos();
+				particlePos.add(move);
+				selectedParticle.setPinnedPos(particlePos);
+			}
+			position.set(touch);
+		}
+	}
+
+	public void cancelTracking() {
+		cancelDragging();
+		position = null;
+	}
+
+	public void cancelDragging() {
+		if (selectedParticle != null) {
+			selectedParticle.setPinned(false);
+			selectedParticle = null;
+		}
 	}
 }
