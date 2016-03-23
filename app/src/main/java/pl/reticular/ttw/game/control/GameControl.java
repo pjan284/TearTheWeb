@@ -32,13 +32,12 @@ import pl.reticular.ttw.game.display.GameDisplay;
 import pl.reticular.ttw.game.model.Game;
 import pl.reticular.ttw.game.model.Spider;
 import pl.reticular.ttw.game.model.SpiderSet;
-import pl.reticular.ttw.game.model.Spring;
-import pl.reticular.ttw.game.model.Web;
 import pl.reticular.ttw.game.model.meta.MetaData;
 import pl.reticular.ttw.game.model.meta.MetaDataHelper;
 import pl.reticular.ttw.game.model.meta.MetaDataMsg;
-import pl.reticular.ttw.game.model.webs.WebFactory;
-import pl.reticular.ttw.game.model.webs.WebType;
+import pl.reticular.ttw.game.model.web.Spring;
+import pl.reticular.ttw.game.model.web.Web;
+import pl.reticular.ttw.game.model.web.WebType;
 import pl.reticular.ttw.utils.Vector2;
 
 public class GameControl implements Web.WebObserver, SpiderSet.SpiderObserver,
@@ -58,7 +57,7 @@ public class GameControl implements Web.WebObserver, SpiderSet.SpiderObserver,
 		this.messageHandler = messageHandler;
 		this.game = game;
 
-		gameDisplay = new GameDisplay();
+		gameDisplay = new GameDisplay(context);
 
 		game.getWeb().setObserver(this);
 		game.getMetaDataHelper().setObserver(this);
@@ -70,8 +69,8 @@ public class GameControl implements Web.WebObserver, SpiderSet.SpiderObserver,
 	public synchronized void setSurfaceSize(int width, int height) {
 		gameDisplay.getCanvasHelper().setSize(width, height);
 
-		WebType webType = getWebType(game.getMetaDataHelper().getMetaData().getLevel());
-		gameDisplay.setupBackground(context, webType);
+		WebType webType = game.getWebType();
+		gameDisplay.setupBackground(webType);
 	}
 
 	public synchronized void frame(Canvas canvas, float dt) {
@@ -134,19 +133,11 @@ public class GameControl implements Web.WebObserver, SpiderSet.SpiderObserver,
 	}
 
 	private void onLevelUp() {
-		WebType webType = getWebType(game.getMetaDataHelper().getMetaData().getLevel());
-		Web web = WebFactory.createWeb(webType);
-		web.setObserver(this);
+		game.prepareLevel();
 
-		gameDisplay.setupBackground(context, webType);
+		game.getWeb().setObserver(this);
 
-		game.setWeb(web);
-		game.getSpiderSet().populate(game.getMetaDataHelper().getMetaData().getLevel(), web);
-	}
-
-	private WebType getWebType(int level) {
-		//levels start from 1, enums from 0
-		return WebType.values()[(level - 1) % WebType.values().length];
+		gameDisplay.setupBackground(game.getWebType());
 	}
 
 	@Override

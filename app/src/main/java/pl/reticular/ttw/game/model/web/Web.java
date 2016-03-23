@@ -1,4 +1,4 @@
-package pl.reticular.ttw.game.model;
+package pl.reticular.ttw.game.model.web;
 
 /*
  * Copyright (C) 2016 Piotr Jankowski
@@ -24,11 +24,12 @@ import android.graphics.RectF;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 
-import pl.reticular.ttw.game.model.graph.Edge;
-import pl.reticular.ttw.game.model.graph.Graph;
-import pl.reticular.ttw.game.model.graph.Node;
+import pl.reticular.ttw.game.model.web.graph.Edge;
+import pl.reticular.ttw.game.model.web.graph.Graph;
+import pl.reticular.ttw.game.model.web.graph.Node;
 import pl.reticular.ttw.utils.Vector2;
 
 public class Web extends Graph {
@@ -43,54 +44,12 @@ public class Web extends Graph {
 
 	private WebObserver observer;
 
-	public Web() {
-		super();
-	}
-
-	public Web(JSONObject json) throws JSONException {
-		super(json);
-	}
-
-	@Override
-	public Node recreateNode(JSONObject state) throws JSONException {
-		return new Particle(state);
-	}
-
-	@Override
-	public Edge recreateEdge(JSONObject state) throws JSONException {
-		return new Spring(this, state);
+	public Web(ArrayList<Node> particles, ArrayList<Edge> springs) {
+		super(particles, springs);
 	}
 
 	public JSONObject toJSON() throws JSONException {
 		return super.toJSON();
-	}
-
-	public void addChain(Particle part1, Particle part2, int segments) {
-		Vector2 p1 = part1.getPos();
-		Vector2 p2 = part2.getPos();
-		Particle start = part1;
-		Particle end = part2;
-		for (int i = 1; i < segments; i++) {
-			Vector2 p = Vector2.lerp(p1, p2, (float) i / (float) segments);
-			Particle part = new Particle(p.X, p.Y, false);
-			nodes.add(part);
-
-			Spring spring = new Spring(this, start, part);
-			edges.add(spring);
-
-			start = part;
-		}
-
-		Spring spring = new Spring(this, start, end);
-		edges.add(spring);
-	}
-
-	public void addNormalizedChain(Particle part1, Particle part2, float segmentLength) {
-		Vector2 p1 = part1.getPos();
-		Vector2 p2 = part2.getPos();
-		float length = Vector2.sub(p1, p2).length();
-
-		addChain(part1, part2, (int) Math.ceil(length / segmentLength));
 	}
 
 	public void update(float dt, Vector2 gravity, RectF gameArea) {

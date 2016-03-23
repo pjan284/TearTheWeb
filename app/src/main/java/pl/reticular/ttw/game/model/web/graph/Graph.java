@@ -1,4 +1,4 @@
-package pl.reticular.ttw.game.model.graph;
+package pl.reticular.ttw.game.model.web.graph;
 
 /*
  * Copyright (C) 2016 Piotr Jankowski
@@ -19,8 +19,6 @@ package pl.reticular.ttw.game.model.graph;
  * along with Tear The Web. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import android.util.Log;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -35,34 +33,14 @@ public abstract class Graph implements Savable {
 	protected ArrayList<Node> nodes;
 	protected ArrayList<Edge> edges;
 
-	private enum Keys {
+	public enum Keys {
 		Nodes,
 		Edges
 	}
 
-	public Graph() {
-		nodes = new ArrayList<>();
-		edges = new ArrayList<>();
-	}
-
-	public Graph(JSONObject json) throws JSONException {
-		nodes = new ArrayList<>();
-		edges = new ArrayList<>();
-
-		JSONArray nodeStates = json.getJSONArray(Keys.Nodes.toString());
-		JSONArray edgeStates = json.getJSONArray(Keys.Edges.toString());
-
-		for (int i = 0; i < nodeStates.length(); i++) {
-			JSONObject nodeState = nodeStates.getJSONObject(i);
-			Node node = recreateNode(nodeState);
-			nodes.add(node);
-		}
-
-		for (int i = 0; i < edgeStates.length(); i++) {
-			JSONObject edgeState = edgeStates.getJSONObject(i);
-			Edge edge = recreateEdge(edgeState);
-			edges.add(edge);
-		}
+	public Graph(ArrayList<Node> nodes, ArrayList<Edge> edges) {
+		this.nodes = nodes;
+		this.edges = edges;
 	}
 
 	@Override
@@ -88,10 +66,6 @@ public abstract class Graph implements Savable {
 		return state;
 	}
 
-	protected abstract Node recreateNode(JSONObject state) throws JSONException;
-
-	protected abstract Edge recreateEdge(JSONObject state) throws JSONException;
-
 	public void onRemoveEdge(Edge edge) {
 		Node n1 = edge.getNode1();
 		n1.removeEdge(edge);
@@ -111,37 +85,12 @@ public abstract class Graph implements Savable {
 		return edges.get(i);
 	}
 
-	public void insert(Edge e) {
-		edges.add(e);
-	}
-
-	public void insert(Node v) {
-		nodes.add(v);
-	}
-
 	public ArrayList<Node> getNodes() {
 		return nodes;
 	}
 
 	public ArrayList<Edge> getEdges() {
 		return edges;
-	}
-
-	public void print() {
-		Log.d(getClass().getName(), "Graph:");
-		for (int i = 0; i < nodes.size(); i++) {
-			String str = i + ": " + printList(nodes.get(i));
-			Log.d(getClass().getName(), str);
-		}
-	}
-
-	private String printList(Node node) {
-		String str = "";
-		for (Edge e : node.edges) {
-			str += nodes.indexOf(e.next(node));
-			str += ", ";
-		}
-		return str;
 	}
 
 	private LinkedList<Node> previousToPath(Node found, HashMap<Node, Node> previous) {
@@ -195,19 +144,13 @@ public abstract class Graph implements Savable {
 		return null;
 	}
 
-	public int getIndexOfNode(Node node) {
-		return nodes.indexOf(node);
-	}
-
-	public Node getNode(int index) {
-		return nodes.get(index);
-	}
-
-	public int getNodesNumber() {
-		return nodes.size();
-	}
-
-	public int getEdgesNumber() {
-		return edges.size();
+	//warning: inefficient
+	public Node getNodeWithId(int id) {
+		for (Node node : nodes) {
+			if (node.getId() == id) {
+				return node;
+			}
+		}
+		return null;
 	}
 }

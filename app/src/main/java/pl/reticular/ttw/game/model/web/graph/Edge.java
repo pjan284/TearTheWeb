@@ -1,4 +1,4 @@
-package pl.reticular.ttw.game.model.graph;
+package pl.reticular.ttw.game.model.web.graph;
 
 /*
  * Copyright (C) 2016 Piotr Jankowski
@@ -22,11 +22,11 @@ package pl.reticular.ttw.game.model.graph;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Map;
+
 import pl.reticular.ttw.utils.Savable;
 
 public class Edge implements Savable {
-	private Graph graph;
-
 	protected Node node1, node2;
 
 	public enum Keys {
@@ -34,9 +34,7 @@ public class Edge implements Savable {
 		Node2
 	}
 
-	public Edge(Graph graph, Node v1, Node v2) {
-		this.graph = graph;
-
+	public Edge(Node v1, Node v2) {
 		node1 = v1;
 		node2 = v2;
 
@@ -44,11 +42,9 @@ public class Edge implements Savable {
 		node2.addEdge(this);
 	}
 
-	public Edge(Graph graph, JSONObject json) throws JSONException {
-		this.graph = graph;
-
-		node1 = graph.getNode(json.getInt(Keys.Node1.toString()));
-		node2 = graph.getNode(json.getInt(Keys.Node2.toString()));
+	public Edge(Map<Integer, Node> nodeMap, JSONObject json) throws JSONException {
+		node1 = nodeMap.get(json.getInt(Keys.Node1.toString()));
+		node2 = nodeMap.get(json.getInt(Keys.Node2.toString()));
 
 		node1.addEdge(this);
 		node2.addEdge(this);
@@ -58,8 +54,8 @@ public class Edge implements Savable {
 	public JSONObject toJSON() throws JSONException {
 		JSONObject json = new JSONObject();
 
-		json.put(Keys.Node1.toString(), graph.getIndexOfNode(node1));
-		json.put(Keys.Node2.toString(), graph.getIndexOfNode(node2));
+		json.put(Keys.Node1.toString(), node1.getId());
+		json.put(Keys.Node2.toString(), node2.getId());
 
 		return json;
 	}

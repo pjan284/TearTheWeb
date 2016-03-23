@@ -29,9 +29,11 @@ import org.json.JSONObject;
 import java.util.LinkedList;
 import java.util.Random;
 
-import pl.reticular.ttw.game.model.graph.Edge;
-import pl.reticular.ttw.game.model.graph.Graph;
-import pl.reticular.ttw.game.model.graph.Node;
+import pl.reticular.ttw.game.model.web.Particle;
+import pl.reticular.ttw.game.model.web.Spring;
+import pl.reticular.ttw.game.model.web.graph.Edge;
+import pl.reticular.ttw.game.model.web.graph.Graph;
+import pl.reticular.ttw.game.model.web.graph.Node;
 import pl.reticular.ttw.utils.Modulo;
 import pl.reticular.ttw.utils.Savable;
 import pl.reticular.ttw.utils.Vector2;
@@ -120,8 +122,8 @@ public class Spider implements Savable {
 
 		mode = json.getInt(Keys.Mode.toString());
 		if (mode != MODE_FALLING) {
-			target = (Particle) graph.getNode(json.getInt(Keys.Target.toString()));
-			Node prevTarget = graph.getNode(json.getInt(Keys.PrevTarget.toString()));
+			target = (Particle) graph.getNodeWithId(json.getInt(Keys.Target.toString()));
+			Node prevTarget = graph.getNodeWithId(json.getInt(Keys.PrevTarget.toString()));
 			spring = (Spring) prevTarget.getEdgeTo(target);
 			springPercent = (float) json.getDouble(Keys.SpringPercent.toString());
 			position = new Vector2();
@@ -147,8 +149,8 @@ public class Spider implements Savable {
 
 		state.put(Keys.Mode.toString(), mode);
 		if (mode != MODE_FALLING) {
-			state.put(Keys.Target.toString(), graph.getIndexOfNode(target));
-			state.put(Keys.PrevTarget.toString(), graph.getIndexOfNode(spring.next(target)));
+			state.put(Keys.Target.toString(), target.getId());
+			state.put(Keys.PrevTarget.toString(), spring.next(target).getId());
 			state.put(Keys.SpringPercent.toString(), springPercent);
 		} else {
 			state.put(Keys.Position.toString(), position.toJSON());

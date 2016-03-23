@@ -1,4 +1,4 @@
-package pl.reticular.ttw.game.model;
+package pl.reticular.ttw.game.model.web;
 
 /*
  * Copyright (C) 2016 Piotr Jankowski
@@ -22,7 +22,7 @@ package pl.reticular.ttw.game.model;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import pl.reticular.ttw.game.model.graph.Node;
+import pl.reticular.ttw.game.model.web.graph.Node;
 import pl.reticular.ttw.utils.Vector2;
 
 public class Particle extends Node {

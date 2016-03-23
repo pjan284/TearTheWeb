@@ -23,7 +23,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 
-import pl.reticular.ttw.game.model.Spring;
+import pl.reticular.ttw.game.model.web.Spring;
 import pl.reticular.ttw.utils.Vector2;
 
 public class SpringDisplay {

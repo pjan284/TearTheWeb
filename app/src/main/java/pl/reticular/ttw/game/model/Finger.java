@@ -22,6 +22,8 @@ package pl.reticular.ttw.game.model;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import pl.reticular.ttw.game.model.web.Particle;
+import pl.reticular.ttw.game.model.web.Web;
 import pl.reticular.ttw.utils.Savable;
 import pl.reticular.ttw.utils.Vector2;
 

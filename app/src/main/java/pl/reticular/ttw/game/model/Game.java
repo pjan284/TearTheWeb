@@ -26,8 +26,9 @@ import org.json.JSONObject;
 
 import pl.reticular.ttw.game.model.meta.MetaData;
 import pl.reticular.ttw.game.model.meta.MetaDataHelper;
-import pl.reticular.ttw.game.model.webs.WebFactory;
-import pl.reticular.ttw.game.model.webs.WebType;
+import pl.reticular.ttw.game.model.web.Web;
+import pl.reticular.ttw.game.model.web.WebFactory;
+import pl.reticular.ttw.game.model.web.WebType;
 import pl.reticular.ttw.utils.Savable;
 import pl.reticular.ttw.utils.Vector2;
 
@@ -49,21 +50,18 @@ public class Game implements Savable {
 	private SpiderSet spiderSet;
 
 	public Game() {
-		web = WebFactory.createWeb(WebType.Round5x6);
 		finger = new Finger();
 		metaDataHelper = new MetaDataHelper();
 		spiderSet = new SpiderSet();
-		spiderSet.populate(metaDataHelper.getMetaData().getLevel(), web);
+
+		prepareLevel();
 	}
 
 	public Game(JSONObject json) throws JSONException {
 
 		metaDataHelper = new MetaDataHelper(new MetaData(json.getJSONObject(Keys.Meta.toString())));
-
-		web = new Web(json.getJSONObject(Keys.Web.toString()));
-
+		web = WebFactory.getInstance().recreate(json.getJSONObject(Keys.Web.toString()));
 		finger = new Finger(json.getJSONObject(Keys.Finger.toString()));
-
 		spiderSet = new SpiderSet(json.getJSONObject(Keys.SpiderManager.toString()), web);
 	}
 
@@ -74,9 +72,7 @@ public class Game implements Savable {
 
 		state.put(Keys.Web.toString(), web.toJSON());
 		state.put(Keys.Finger.toString(), finger.toJSON());
-
 		state.put(Keys.SpiderManager.toString(), spiderSet.toJSON());
-
 		state.put(Keys.Meta.toString(), metaDataHelper.getMetaData().toJSON());
 
 		return state;
@@ -128,5 +124,20 @@ public class Game implements Savable {
 				metaDataHelper.die();
 			}
 		}
+	}
+
+	public void prepareLevel() {
+		int level = metaDataHelper.getMetaData().getLevel();
+		WebType webType = getWebType();
+
+		web = WebFactory.getInstance().create(webType);
+
+		spiderSet.populate(level, web);
+	}
+
+	public WebType getWebType() {
+		int level = metaDataHelper.getMetaData().getLevel();
+		//levels start from 1, enums from 0
+		return WebType.values()[(level - 1) % WebType.values().length];
 	}
 }

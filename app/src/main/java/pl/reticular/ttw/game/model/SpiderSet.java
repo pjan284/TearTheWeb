@@ -28,6 +28,9 @@ import org.json.JSONObject;
 import java.util.Iterator;
 import java.util.LinkedList;
 
+import pl.reticular.ttw.game.model.web.Particle;
+import pl.reticular.ttw.game.model.web.Spring;
+import pl.reticular.ttw.game.model.web.Web;
 import pl.reticular.ttw.utils.Savable;
 import pl.reticular.ttw.utils.Vector2;
 

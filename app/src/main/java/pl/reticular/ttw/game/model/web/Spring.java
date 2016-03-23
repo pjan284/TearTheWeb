@@ -1,4 +1,4 @@
-package pl.reticular.ttw.game.model;
+package pl.reticular.ttw.game.model.web;
 
 /*
  * Copyright (C) 2016 Piotr Jankowski
@@ -24,8 +24,10 @@ import android.graphics.RectF;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import pl.reticular.ttw.game.model.graph.Edge;
-import pl.reticular.ttw.game.model.graph.Node;
+import java.util.Map;
+
+import pl.reticular.ttw.game.model.web.graph.Edge;
+import pl.reticular.ttw.game.model.web.graph.Node;
 import pl.reticular.ttw.utils.Vector2;
 
 public class Spring extends Edge {
@@ -42,16 +44,16 @@ public class Spring extends Edge {
 	public class BrokenException extends Exception {
 	}
 
-	public Spring(Web web, Particle particle1, Particle particle2) {
-		super(web, particle1, particle2);
+	public Spring(Particle particle1, Particle particle2) {
+		super(particle1, particle2);
 		this.particle1 = (Particle) node1;
 		this.particle2 = (Particle) node2;
 
 		defaultLength = length() * tensionFactor;
 	}
 
-	public Spring(Web web, JSONObject json) throws JSONException {
-		super(web, json);
+	public Spring(Map<Integer, Node> nodeMap, JSONObject json) throws JSONException {
+		super(nodeMap, json);
 		this.particle1 = (Particle) node1;
 		this.particle2 = (Particle) node2;
 

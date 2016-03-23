@@ -1,4 +1,4 @@
-package pl.reticular.ttw.game.model.webs;
+package pl.reticular.ttw.game.model.web;
 
 /*
  * Copyright (C) 2016 Piotr Jankowski

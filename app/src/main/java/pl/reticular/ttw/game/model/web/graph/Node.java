@@ -1,4 +1,4 @@
-package pl.reticular.ttw.game.model.graph;
+package pl.reticular.ttw.game.model.web.graph;
 
 /*
  * Copyright (C) 2016 Piotr Jankowski
@@ -27,20 +27,33 @@ import java.util.LinkedList;
 import pl.reticular.ttw.utils.Savable;
 
 public class Node implements Savable {
+	private static int nextId;
+
+	private int id;
+
 	protected LinkedList<Edge> edges;
 
+	private enum Keys {
+		Id
+	}
+
 	public Node() {
+		id = nextId;
+		nextId++;
 		edges = new LinkedList<>();
 	}
 
 	public Node(JSONObject json) throws JSONException {
 		edges = new LinkedList<>();
+		id = json.getInt(Keys.Id.toString());
 	}
 
 
 	@Override
 	public JSONObject toJSON() throws JSONException {
-		return new JSONObject();
+		JSONObject json = new JSONObject();
+		json.put(Keys.Id.toString(), id);
+		return json;
 	}
 
 	public void addEdge(Edge edge) {
@@ -62,5 +75,9 @@ public class Node implements Savable {
 			}
 		}
 		return null;
+	}
+
+	public int getId() {
+		return id;
 	}
 }

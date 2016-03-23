@@ -21,9 +21,9 @@ package pl.reticular.ttw.game.display;
 
 import android.graphics.Canvas;
 
-import pl.reticular.ttw.game.model.Spring;
-import pl.reticular.ttw.game.model.Web;
-import pl.reticular.ttw.game.model.graph.Edge;
+import pl.reticular.ttw.game.model.web.Spring;
+import pl.reticular.ttw.game.model.web.Web;
+import pl.reticular.ttw.game.model.web.graph.Edge;
 
 public class WebDisplay {
 	private SpringDisplay springDisplay;

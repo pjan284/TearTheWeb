@@ -22,13 +22,15 @@ package pl.reticular.ttw.game.display;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Shader;
 
 import pl.reticular.ttw.R;
 import pl.reticular.ttw.game.model.Game;
-import pl.reticular.ttw.game.model.webs.WebFactory;
-import pl.reticular.ttw.game.model.webs.WebType;
+import pl.reticular.ttw.game.model.web.WebType;
 import pl.reticular.ttw.utils.CanvasHelper;
 
 public class GameDisplay {
@@ -41,12 +43,43 @@ public class GameDisplay {
 	private SpiderSetDisplay spiderSetDisplay;
 	private FingerDisplay fingerDisplay;
 
-	public GameDisplay() {
+	private int backgroundColor;
+	private Paint backgroundPaint;
+	private Paint borderPaint;
+	private Paint gameAreaPaint;
+
+	public GameDisplay(Context context) {
 		canvasHelper = new CanvasHelper();
-		backgroundBitmap = null;
 		webDisplay = new WebDisplay();
 		spiderSetDisplay = new SpiderSetDisplay();
 		fingerDisplay = new FingerDisplay();
+
+		backgroundBitmap = null;
+
+		// read app background image
+		Bitmap appBackground = BitmapFactory.decodeResource(context.getResources(), R.drawable.web);
+
+		backgroundColor = context.getResources().getColor(R.color.colorBackground);
+		int borderColor = Color.BLACK;
+
+		backgroundPaint = new Paint();
+		backgroundPaint.setStyle(Paint.Style.FILL);
+		if (appBackground != null) {
+			Shader shader = new BitmapShader(appBackground, Shader.TileMode.REPEAT, Shader.TileMode.REPEAT);
+			backgroundPaint.setShader(shader);
+		} else {
+			backgroundPaint.setColor(Color.TRANSPARENT);
+		}
+
+		borderPaint = new Paint();
+		borderPaint.setColor(borderColor);
+		borderPaint.setStyle(Paint.Style.STROKE);
+		borderPaint.setStrokeWidth(3.0f);
+		borderPaint.setAntiAlias(true);
+
+		gameAreaPaint = new Paint();
+		gameAreaPaint.setColor(backgroundColor);
+		gameAreaPaint.setStyle(Paint.Style.FILL);
 	}
 
 	public void draw(Game game, Canvas canvas, float scale) {
@@ -69,22 +102,39 @@ public class GameDisplay {
 		return canvasHelper;
 	}
 
-	public void setupBackground(Context context, WebType wt) {
-		// read background image
-		Bitmap bgBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.web);
-
-		@SuppressWarnings("deprecation")
-		int bgColor = context.getResources().getColor(R.color.colorBackground);
-
+	public void setupBackground(WebType webType) {
 		if (backgroundBitmap != null && !backgroundBitmap.isRecycled()) {
 			backgroundBitmap.recycle();
 		}
 
 		backgroundBitmap = Bitmap.createBitmap(canvasHelper.getWidth(), canvasHelper.getHeight(), Bitmap.Config.ARGB_8888);
 
-		Canvas bgCanvas = new Canvas(backgroundBitmap);
-		canvasHelper.translate(bgCanvas);
+		Canvas canvas = new Canvas(backgroundBitmap);
+		canvasHelper.translate(canvas);
 
-		WebFactory.generateBackground(bgCanvas, bgBitmap, bgColor, bgColor, Color.BLACK, canvasHelper.getScale(), wt);
+		float scale = canvasHelper.getScale();
+
+		canvas.drawColor(backgroundColor);
+
+		canvas.drawRect(canvas.getClipBounds(), backgroundPaint);
+
+		switch (webType) {
+			case Round5x6:
+			case Round4x7:
+			case Round5x7:
+			case Round4x8:
+				canvas.drawCircle(0.0f, 0.0f, 0.9f * scale, gameAreaPaint);
+				canvas.drawCircle(0.0f, 0.0f, 0.9f * scale, borderPaint);
+				break;
+			case Rect5x5:
+			case Rect6x6:
+			case Rect7x7:
+			case Rect8x8:
+				canvas.drawRect(0.9f * scale, 0.9f * scale, 0.9f * scale, 0.9f * scale, gameAreaPaint);
+				canvas.drawRect(0.9f * scale, 0.9f * scale, 0.9f * scale, 0.9f * scale, borderPaint);
+				break;
+			default:
+				break;
+		}
 	}
 }
