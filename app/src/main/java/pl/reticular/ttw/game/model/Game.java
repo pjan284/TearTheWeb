@@ -26,13 +26,14 @@ import org.json.JSONObject;
 
 import pl.reticular.ttw.game.model.meta.MetaData;
 import pl.reticular.ttw.game.model.meta.MetaDataHelper;
+import pl.reticular.ttw.game.model.web.Spring;
 import pl.reticular.ttw.game.model.web.Web;
 import pl.reticular.ttw.game.model.web.WebFactory;
 import pl.reticular.ttw.game.model.web.WebType;
 import pl.reticular.ttw.utils.Savable;
 import pl.reticular.ttw.utils.Vector2;
 
-public class Game implements Savable {
+public class Game implements Savable, Web.WebObserver, SpiderSet.SpiderObserver {
 
 	private enum Keys {
 		Web,
@@ -53,6 +54,7 @@ public class Game implements Savable {
 		finger = new Finger();
 		metaDataHelper = new MetaDataHelper();
 		spiderSet = new SpiderSet();
+		spiderSet.setObserver(this);
 
 		prepareLevel();
 	}
@@ -61,8 +63,10 @@ public class Game implements Savable {
 
 		metaDataHelper = new MetaDataHelper(new MetaData(json.getJSONObject(Keys.Meta.toString())));
 		web = WebFactory.getInstance().recreate(json.getJSONObject(Keys.Web.toString()));
+		web.setObserver(this);
 		finger = new Finger(json.getJSONObject(Keys.Finger.toString()));
 		spiderSet = new SpiderSet(json.getJSONObject(Keys.SpiderManager.toString()), web);
+		spiderSet.setObserver(this);
 	}
 
 	@Override
@@ -131,6 +135,7 @@ public class Game implements Savable {
 		WebType webType = getWebType();
 
 		web = WebFactory.getInstance().create(webType);
+		web.setObserver(this);
 
 		spiderSet.populate(level, web);
 	}
@@ -139,5 +144,27 @@ public class Game implements Savable {
 		int level = metaDataHelper.getMetaData().getLevel();
 		//levels start from 1, enums from 0
 		return WebType.values()[(level - 1) % WebType.values().length];
+	}
+
+	@Override
+	public void onSpringBroken(Spring spring) {
+		if (!isFinished()) {
+			finger.cancelTracking();
+			metaDataHelper.addScore(1);
+		}
+
+		spiderSet.onSpringUnAvailable(spring);
+	}
+
+	@Override
+	public void onSpringOut(Spring spring) {
+		spiderSet.onSpringUnAvailable(spring);
+	}
+
+	@Override
+	public void onSpiderOut(Spider spider) {
+		if (!isFinished()) {
+			metaDataHelper.addScore(10);
+		}
 	}
 }

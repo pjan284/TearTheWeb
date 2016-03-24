@@ -40,8 +40,8 @@ import org.json.JSONObject;
 
 import java.lang.ref.WeakReference;
 
-import pl.reticular.ttw.game.control.GameControl;
-import pl.reticular.ttw.game.display.system.GameSurfaceView;
+import pl.reticular.ttw.game.engine.GameEngine;
+import pl.reticular.ttw.game.engine.GameSurfaceView;
 import pl.reticular.ttw.game.model.Game;
 import pl.reticular.ttw.game.model.meta.MetaData;
 import pl.reticular.ttw.game.model.meta.MetaDataMsg;
@@ -63,7 +63,7 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
 
 	private SharedPreferences preferences;
 
-	private GameControl gameControl;
+	private GameEngine gameEngine;
 
 	private Handler handler;
 
@@ -114,9 +114,9 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
 			game = new Game();
 		}
 
-		gameControl = new GameControl(this, new MessageHandler(this), game);
+		gameEngine = new GameEngine(this, new MessageHandler(this), game);
 
-		gameSurfaceView.setGameControl(gameControl);
+		gameSurfaceView.setGameEngine(gameEngine);
 
 		handler = new Handler();
 
@@ -161,10 +161,10 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
 		super.onStop();
 		Log.i(getClass().getName(), "onStop");
 
-		if (gameControl.isFinished()) {
+		if (gameEngine.isFinished()) {
 			finish();
 		} else {
-			saveLastGame(gameControl.getGame());
+			saveLastGame(gameEngine.getGame());
 		}
 
 		handler.removeCallbacks(highScoreLauncher);
@@ -300,7 +300,7 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
 			z = 0.0f;
 		}
 
-		gameControl.setGravity(x, y, z);
+		gameEngine.setGravity(x, y, z);
 	}
 
 	@Override

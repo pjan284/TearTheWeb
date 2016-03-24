@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     tools:context=".GameActivity">
 
-    <pl.reticular.ttw.game.display.system.GameSurfaceView
+    <pl.reticular.ttw.game.engine.GameSurfaceView
         android:id="@+id/view_game"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />

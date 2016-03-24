@@ -1,4 +1,4 @@
-package pl.reticular.ttw.game.control;
+package pl.reticular.ttw.game.engine;
 
 /*
  * Copyright (C) 2016 Piotr Jankowski
@@ -30,19 +30,13 @@ import org.json.JSONException;
 
 import pl.reticular.ttw.game.display.GameDisplay;
 import pl.reticular.ttw.game.model.Game;
-import pl.reticular.ttw.game.model.Spider;
-import pl.reticular.ttw.game.model.SpiderSet;
 import pl.reticular.ttw.game.model.meta.MetaData;
 import pl.reticular.ttw.game.model.meta.MetaDataHelper;
 import pl.reticular.ttw.game.model.meta.MetaDataMsg;
-import pl.reticular.ttw.game.model.web.Spring;
-import pl.reticular.ttw.game.model.web.Web;
 import pl.reticular.ttw.game.model.web.WebType;
 import pl.reticular.ttw.utils.Vector2;
 
-public class GameControl implements Web.WebObserver, SpiderSet.SpiderObserver,
-		MetaDataHelper.MetaDataObserver {
-	private Context context;
+public class GameEngine implements MetaDataHelper.MetaDataObserver {
 
 	private Handler messageHandler;
 
@@ -52,16 +46,13 @@ public class GameControl implements Web.WebObserver, SpiderSet.SpiderObserver,
 
 	private Vector2 gravity;
 
-	public GameControl(Context context, Handler messageHandler, Game game) {
-		this.context = context;
+	public GameEngine(Context context, Handler messageHandler, Game game) {
 		this.messageHandler = messageHandler;
 		this.game = game;
 
 		gameDisplay = new GameDisplay(context);
 
-		game.getWeb().setObserver(this);
 		game.getMetaDataHelper().setObserver(this);
-		game.getSpiderSet().setObserver(this);
 
 		gravity = new Vector2(0.0f, 1.0f);
 	}
@@ -110,32 +101,8 @@ public class GameControl implements Web.WebObserver, SpiderSet.SpiderObserver,
 		return game;
 	}
 
-	@Override
-	public void onSpringBroken(Spring spring) {
-		if (!isFinished()) {
-			game.getFinger().cancelTracking();
-			game.getMetaDataHelper().addScore(1);
-		}
-
-		game.getSpiderSet().onSpringUnAvailable(spring);
-	}
-
-	@Override
-	public void onSpringOut(Spring spring) {
-		game.getSpiderSet().onSpringUnAvailable(spring);
-	}
-
-	@Override
-	public void onSpiderOut(Spider spider) {
-		if (!isFinished()) {
-			game.getMetaDataHelper().addScore(10);
-		}
-	}
-
 	private void onLevelUp() {
 		game.prepareLevel();
-
-		game.getWeb().setObserver(this);
 
 		gameDisplay.setupBackground(game.getWebType());
 	}
