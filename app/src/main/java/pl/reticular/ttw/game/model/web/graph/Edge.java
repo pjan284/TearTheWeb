@@ -46,6 +46,10 @@ public class Edge implements Savable {
 		node1 = nodeMap.get(json.getInt(Keys.Node1.toString()));
 		node2 = nodeMap.get(json.getInt(Keys.Node2.toString()));
 
+		if(node1 == null || node2 == null) {
+			throw new JSONException("Cannot find node(s)");
+		}
+
 		node1.addEdge(this);
 		node2.addEdge(this);
 	}

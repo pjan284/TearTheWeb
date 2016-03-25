@@ -35,7 +35,7 @@ public class Finger implements Savable {
 	private float radius;
 	private Particle selectedParticle;
 
-	private static final float healTime = 2.0f;
+	private static final float healTime = 1.0f;
 
 	private enum Keys {
 		Bitten,

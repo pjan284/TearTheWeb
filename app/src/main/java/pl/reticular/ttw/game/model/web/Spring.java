@@ -90,6 +90,10 @@ public class Spring extends Edge {
 			throw new BrokenException();
 		}
 
+		if(currentLength == 0.0f) {
+			return;
+		}
+
 		float diff = defaultLength - currentLength;
 
 		lx /= currentLength;

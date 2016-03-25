@@ -120,18 +120,18 @@ public class GameDisplay {
 
 		switch (webType) {
 			case Round5x6:
-			case Round4x7:
-			case Round5x7:
 			case Round4x8:
+			case Round3x10:
+			case Spiral35x6:
+			case Spiral25x8:
 				canvas.drawCircle(0.0f, 0.0f, 0.9f * scale, gameAreaPaint);
 				canvas.drawCircle(0.0f, 0.0f, 0.9f * scale, borderPaint);
 				break;
 			case Rect5x5:
 			case Rect6x6:
 			case Rect7x7:
-			case Rect8x8:
-				canvas.drawRect(0.9f * scale, 0.9f * scale, 0.9f * scale, 0.9f * scale, gameAreaPaint);
-				canvas.drawRect(0.9f * scale, 0.9f * scale, 0.9f * scale, 0.9f * scale, borderPaint);
+				canvas.drawRect(-0.9f * scale, -0.9f * scale, 0.9f * scale, 0.9f * scale, gameAreaPaint);
+				canvas.drawRect(-0.9f * scale, -0.9f * scale, 0.9f * scale, 0.9f * scale, borderPaint);
 				break;
 			default:
 				break;

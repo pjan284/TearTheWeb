@@ -70,20 +70,20 @@ public class WebFactory {
 		switch (webType) {
 			case Round5x6:
 				return createRoundWeb(0, 0, 0.1f, 0.9f, 5, 6, 0.1f);
-			case Round4x7:
-				return createRoundWeb(0, 0, 0.1f, 0.9f, 4, 7, 0.1f);
-			case Round5x7:
-				return createRoundWeb(0, 0, 0.1f, 0.9f, 5, 7, 0.1f);
 			case Round4x8:
 				return createRoundWeb(0, 0, 0.1f, 0.9f, 4, 8, 0.1f);
+			case Round3x10:
+				return createRoundWeb(0, 0, 0.2f, 0.9f, 3, 10, 0.1f);
 			case Rect5x5:
 				return createRectWeb(-0.9f, -0.9f, 0.9f, 0.9f, 5, 5, 0.1f);
 			case Rect6x6:
 				return createRectWeb(-0.9f, -0.9f, 0.9f, 0.9f, 6, 6, 0.1f);
 			case Rect7x7:
 				return createRectWeb(-0.9f, -0.9f, 0.9f, 0.9f, 7, 7, 0.1f);
-			case Rect8x8:
-				return createRectWeb(-0.9f, -0.9f, 0.9f, 0.9f, 8, 8, 0.1f);
+			case Spiral35x6:
+				return createArchimedeanSpiralWeb(0, 0, 0.1f, 0.7f, 21, 6, 0.9f, 0.1f);
+			case Spiral25x8:
+				return createArchimedeanSpiralWeb(0, 0, 0.1f, 0.7f, 20, 8, 0.9f, 0.1f);
 			default:
 				return createRoundWeb(0, 0, 0.1f, 0.9f, 5, 6, 0.1f);
 		}
@@ -173,12 +173,77 @@ public class WebFactory {
 		return new Web(particles, springs);
 	}
 
+	private Web createArchimedeanSpiralWeb(float xs, float ys, float rMin, float rMax, int steps,
+	                                       int sectors, float rOuter, float spacing) {
+		ArrayList<Node> particles = new ArrayList<>();
+		ArrayList<Edge> springs = new ArrayList<>();
+
+		float baseAngle = (float) Math.PI * (-0.5f - 3.0f / sectors);
+
+		Particle keyParticles[] = new Particle[sectors];
+
+		// center
+		Particle center = new Particle(xs, ys, false);
+		particles.add(center);
+		for (int s = 0; s < sectors; s++) {
+			keyParticles[s] = center;
+		}
+
+		// spiral
+		float angleStep = (float) Math.PI * 2.0f / sectors;
+		float rStep = (rMax - rMin) / steps;
+		Particle prevParticle = keyParticles[0];
+		for (int n = 0; n <= steps; n++) {
+
+			float angle = baseAngle + n * angleStep;
+			float r = rMin + n * rStep;
+
+			Particle p = new Particle((float) (xs + r * Math.cos(angle)),
+					(float) (ys + r * Math.sin(angle)),
+					false);
+			particles.add(p);
+
+			// spiral chain
+			if (n != 0) {
+				addChain(particles, springs, p, prevParticle, spacing);
+			}
+			prevParticle = p;
+
+			// radial chain
+			addChain(particles, springs, p, keyParticles[n % sectors], spacing);
+			keyParticles[n % sectors] = p;
+		}
+
+		// outer circle
+		for (int s = 0; s < sectors; s++) {
+			float angle = baseAngle + s * ((float) Math.PI * 2.0f / sectors);
+
+			Particle p = new Particle(xs + rOuter * (float) Math.cos(angle),
+					ys + rOuter * (float) Math.sin(angle),
+					true);
+			particles.add(p);
+
+			// round chain
+			if (s > 0) {
+				addChain(particles, springs, p, keyParticles[s - 1], spacing);
+			}
+
+			// radial chain
+			addChain(particles, springs, p, keyParticles[s], spacing);
+			keyParticles[s] = p;
+		}
+		// finnish round chain
+		addChain(particles, springs, keyParticles[sectors - 1], keyParticles[0], spacing);
+
+		return new Web(particles, springs);
+	}
+
 	private void addChain(ArrayList<Node> particles, ArrayList<Edge> springs, Particle start, Particle end, float segmentLength) {
 		Vector2 p1 = start.getPos();
 		Vector2 p2 = end.getPos();
 		float length = Vector2.sub(p1, p2).length();
 
-		int segments = (int) Math.ceil(length / segmentLength);
+		int segments = (int) Math.floor(length / segmentLength);
 
 		for (int i = 1; i < segments; i++) {
 			Vector2 p = Vector2.lerp(p1, p2, (float) i / (float) segments);
