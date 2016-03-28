@@ -82,16 +82,12 @@ public class Spring extends Edge {
 
 		float currentLength = Vector2.length(lx, ly);
 
-		if (currentLength < defaultLength) {
+		if (currentLength < defaultLength || currentLength == 0.0f) {
 			return;
 		}
 
 		if (currentLength > defaultLength * tearFactor) {
 			throw new BrokenException();
-		}
-
-		if(currentLength == 0.0f) {
-			return;
 		}
 
 		float diff = defaultLength - currentLength;
@@ -105,28 +101,6 @@ public class Spring extends Edge {
 		//try to restore original length
 		p1.add(diffX, diffY);
 		p2.add(-diffX, -diffY);
-	}
-
-	public boolean scissors(float px, float py, float sense) {
-		return distanceToPoint(px, py) <= sense;
-	}
-
-	public float distanceToPoint(float px, float py) {
-		Vector2 p1 = particle1.getPos();
-		Vector2 p2 = particle2.getPos();
-		Vector2 p3;
-		float A = p2.X - p1.X;
-		float B = p2.Y - p1.Y;
-
-		float u = (float) ((A * (px - p1.X) + B * (py - p1.Y)) / (Math.pow(A, 2) + Math.pow(B, 2)));
-		if (u <= 0) {
-			p3 = p1;
-		} else if (u >= 1) {
-			p3 = p2;
-		} else {
-			p3 = new Vector2(p1.X + u * A, p1.Y + u * B);
-		}
-		return (float) Math.sqrt(Math.pow(px - p3.X, 2) + Math.pow(py - p3.Y, 2));
 	}
 
 	public Vector2 getInterpolatedPosition(float a, Node end) {

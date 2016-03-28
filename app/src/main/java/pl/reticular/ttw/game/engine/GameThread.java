@@ -27,6 +27,7 @@ import android.view.SurfaceHolder;
 public class GameThread implements Runnable {
 
 	private static final int maxFPS = 30;
+	private static final int minSleep = 5;
 
 	private final SurfaceHolder surfaceHolder;
 
@@ -79,12 +80,12 @@ public class GameThread implements Runnable {
 
 			long timeEnd = System.currentTimeMillis();
 			long elapsed = timeEnd - timeStart;
-			long limit = 1000 / maxFPS;
+			long limit = 1000 / maxFPS - minSleep;
 			try {
 				if (elapsed < limit) {
 					Thread.sleep(limit - elapsed);
 				} else {
-					Thread.sleep(10);
+					Thread.sleep(minSleep);
 				}
 			} catch (InterruptedException e) {
 			}

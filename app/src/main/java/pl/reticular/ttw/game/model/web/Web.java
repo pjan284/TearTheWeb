@@ -40,8 +40,6 @@ public class Web extends Graph {
 		void onSpringOut(Spring spring);
 	}
 
-	protected final int physicsAccuracy = 1;
-
 	private WebObserver observer;
 
 	public Web(ArrayList<Node> particles, ArrayList<Edge> springs) {
@@ -54,17 +52,15 @@ public class Web extends Graph {
 
 	public void update(float dt, Vector2 gravity, RectF gameArea) {
 		// Resolve springs and remove broken
-		for (int i = 0; i < physicsAccuracy; i++) {
-			Iterator<Edge> it = edges.iterator();
-			while (it.hasNext()) {
-				Spring spring = (Spring) it.next();
-				try {
-					spring.resolveVerlet();
-				} catch (Spring.BrokenException e) {
-					observer.onSpringBroken(spring);
-					onRemoveEdge(spring);
-					it.remove();
-				}
+		Iterator<Edge> it = edges.iterator();
+		while (it.hasNext()) {
+			Spring spring = (Spring) it.next();
+			try {
+				spring.resolveVerlet();
+			} catch (Spring.BrokenException e) {
+				observer.onSpringBroken(spring);
+				onRemoveEdge(spring);
+				it.remove();
 			}
 		}
 
@@ -74,7 +70,7 @@ public class Web extends Graph {
 		}
 
 		// Remove springs that fallen out of game area
-		Iterator<Edge> it = edges.iterator();
+		it = edges.iterator();
 		while (it.hasNext()) {
 			Spring spring = (Spring) it.next();
 			if (spring.isOut(gameArea)) {
