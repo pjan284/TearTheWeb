@@ -240,6 +240,7 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
 							break;
 						case LevelUp:
 							gameActivity.displayLevelUp(metaData.getLevel());
+							gameActivity.displayLivesLeft(metaData.getLives());
 							break;
 					}
 				} catch (JSONException e) {
@@ -250,8 +251,12 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
 	}
 
 	private void displayLivesLeft(int livesLeft) {
-		String string = getResources().getString(R.string.game_lives);
-		topRightText.setText(String.format(string, livesLeft));
+		if (livesLeft >= 0) {
+			String string = getResources().getString(R.string.game_lives);
+			topRightText.setText(String.format(string, livesLeft));
+		} else {
+			topRightText.setText(R.string.game_game_over);
+		}
 	}
 
 	private void displayScore(int score) {

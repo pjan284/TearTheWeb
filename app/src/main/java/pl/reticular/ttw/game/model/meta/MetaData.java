@@ -89,7 +89,8 @@ public class MetaData implements Savable {
 
 	public MetaData levelUp() {
 		int newLevel = level + 1;
-		return new MetaData(newLevel, newLevel, score);
+		int newLives = lives + 1;
+		return new MetaData(newLevel, newLives, score);
 	}
 
 	public MetaData addScore(int add) {
@@ -101,7 +102,7 @@ public class MetaData implements Savable {
 	}
 
 	public boolean isFinished() {
-		return lives <= 0;
+		return lives < 0;
 	}
 }
 
