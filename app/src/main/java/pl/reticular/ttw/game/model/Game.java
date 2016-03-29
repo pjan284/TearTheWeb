@@ -126,6 +126,10 @@ public class Game implements Savable, Web.WebObserver, SpiderSet.SpiderObserver 
 			if (spiderSet.areAnyInContactWith(finger)) {
 				finger.setBitten(true);
 				metaDataHelper.die();
+
+				if (isFinished()) {
+					finger.cancelTracking();
+				}
 			}
 		}
 	}

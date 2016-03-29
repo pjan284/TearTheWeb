@@ -71,6 +71,10 @@ public class GameEngine implements MetaDataHelper.MetaDataObserver {
 	}
 
 	public synchronized void onTouchEvent(MotionEvent motionEvent) {
+		if (game.isFinished()) {
+			return;
+		}
+
 		Vector2 touch;
 		switch (motionEvent.getAction()) {
 			case MotionEvent.ACTION_DOWN:
