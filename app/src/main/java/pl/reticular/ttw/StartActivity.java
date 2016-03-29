@@ -24,7 +24,6 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.PopupMenu;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -43,7 +42,7 @@ public class StartActivity extends AppCompatActivity
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		Log.i(getClass().getName(), "onCreate");
+		//Log.i(getClass().getName(), "onCreate");
 
 		setContentView(R.layout.layout_start);
 
@@ -86,7 +85,7 @@ public class StartActivity extends AppCompatActivity
 	@Override
 	protected void onStart() {
 		super.onStart();
-		Log.i(getClass().getName(), "onStart");
+		//Log.i(getClass().getName(), "onStart");
 
 		preferences.registerOnSharedPreferenceChangeListener(this);
 
@@ -96,7 +95,7 @@ public class StartActivity extends AppCompatActivity
 	@Override
 	protected void onStop() {
 		super.onStop();
-		Log.i(getClass().getName(), "onStop");
+		//Log.i(getClass().getName(), "onStop");
 
 		preferences.unregisterOnSharedPreferenceChangeListener(this);
 	}

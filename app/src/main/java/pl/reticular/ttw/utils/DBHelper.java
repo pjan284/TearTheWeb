@@ -22,7 +22,6 @@ package pl.reticular.ttw.utils;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
 public class DBHelper extends SQLiteOpenHelper {
 
@@ -34,15 +33,15 @@ public class DBHelper extends SQLiteOpenHelper {
 	}
 
 	public void onCreate(SQLiteDatabase db) {
-		Log.d(getClass().getName(), "onCreate");
+		//Log.d(getClass().getName(), "onCreate");
 		ResultsTableHelper.createTable(db);
 	}
 
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		Log.d(getClass().getName(), "onUpgrade");
+		//Log.d(getClass().getName(), "onUpgrade");
 	}
 
 	public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		Log.d(getClass().getName(), "onDowngrade");
+		//Log.d(getClass().getName(), "onDowngrade");
 	}
 }

@@ -30,7 +30,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.Gravity;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -73,7 +72,7 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		Log.i(getClass().getName(), "onCreate");
+		//Log.i(getClass().getName(), "onCreate");
 
 		sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
 		accelerometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
@@ -131,7 +130,7 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
 	@Override
 	protected void onResume() {
 		super.onResume();
-		Log.i(getClass().getName(), "onResume");
+		//Log.i(getClass().getName(), "onResume");
 
 		if (accelerometerSensor != null) {
 			sensorAvailable = sensorManager.registerListener(this,
@@ -143,7 +142,7 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
 	@Override
 	protected void onPause() {
 		super.onPause();
-		Log.i(getClass().getName(), "onPause");
+		//Log.i(getClass().getName(), "onPause");
 
 		if (sensorAvailable) {
 			sensorManager.unregisterListener(this);
@@ -159,7 +158,7 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
 	@Override
 	protected void onStop() {
 		super.onStop();
-		Log.i(getClass().getName(), "onStop");
+		//Log.i(getClass().getName(), "onStop");
 
 		if (gameEngine.isFinished()) {
 			finish();

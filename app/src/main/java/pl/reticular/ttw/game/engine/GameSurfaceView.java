@@ -22,7 +22,6 @@ package pl.reticular.ttw.game.engine;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -58,13 +57,13 @@ public class GameSurfaceView extends SurfaceView implements SurfaceHolder.Callba
 
 	@Override
 	public void surfaceCreated(SurfaceHolder holder) {
-		Log.i(getClass().getName(), "surfaceCreated");
+		//Log.i(getClass().getName(), "surfaceCreated");
 		setWillNotDraw(false);
 	}
 
 	@Override
 	public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-		Log.i(getClass().getName(), "surfaceChanged");
+		//Log.i(getClass().getName(), "surfaceChanged");
 		gameEngine.setSurfaceSize(width, height);
 		if (gameThread != null) {
 			gameThread.terminate();
@@ -74,7 +73,7 @@ public class GameSurfaceView extends SurfaceView implements SurfaceHolder.Callba
 
 	@Override
 	public void surfaceDestroyed(SurfaceHolder holder) {
-		Log.i(getClass().getName(), "surfaceDestroyed");
+		//Log.i(getClass().getName(), "surfaceDestroyed");
 		gameThread.terminate();
 		gameThread = null;
 	}
