@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="about_license">Licencja</string>
+    <string name="app_copyright">Copyright © 2016 Piotr Jankowski</string>
+    <string name="app_license">Tear The Web jest udostępniany BEZ JAKICHKOLWIEK GWARANCJI; żeby zobaczyć szczegóły kliknij na przycisk Licencja. To jest wolne oprogramowanie i możesz je rozpowszechniać pod pewnymi warunkami; żeby zobaczyć szczegóły kliknij na przycisk Licencja.</string>
+    <string name="app_name">Tear The Web</string>
+    <string name="game_game_over">Przegrana!</string>
+    <string name="game_level">poziom: %d</string>
+    <string name="game_lives">życia: %d</string>
+    <string name="game_score">punkty: %d</string>
+    <string name="help_how_to_play">Jak grać:</string>
+    <string name="help_text_1">Palcem pociągnij i zerwij nitki pajęczyny! Zdobędziesz punkty za każdą zerwaną nitkę.</string>
+    <string name="help_text_2">Spróbuj wyrzucić wszystkie pająki poza ekran. Zdobędziesz za to jeszcze więcej punktów.</string>
+    <string name="help_text_3">Uważaj! Nie dotykaj pająków bezpośrednio, bo mogą Cię ugryźć!</string>
+    <string name="help_text_4">Nowy poziom zacznie się gdy na ekranie nie będzie już więcej pająków.</string>
+    <string name="high_scores_action_clear">wyczyść</string>
+    <string name="high_scores_date">Data</string>
+    <string name="high_scores_no_games">Puste!</string>
+    <string name="high_scores_score">Punkty</string>
+    <string name="start_continue_game">Kontynuuj</string>
+    <string name="start_high_scores">Wyniki</string>
+    <string name="start_more">więcej</string>
+    <string name="start_new_game">Nowa gra</string>
+    <string name="start_spiders">i pozbądź się pająków</string>
+    <string name="start_tear_the_web">podrzyj pajęczynę</string>
+    <string name="title_activity_about">O grze</string>
+    <string name="title_activity_game">Podrzyj pajęczynę</string>
+    <string name="title_activity_help">Pomoc</string>
+    <string name="title_activity_high_scores">Wyniki</string>
+    <string name="title_activity_start">Podrzyj pajęczynę</string>
+</resources>
