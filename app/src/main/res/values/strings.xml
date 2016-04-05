@@ -8,7 +8,7 @@
     <string name="game_lives">lives: %d</string>
     <string name="game_score">score: %d</string>
     <string name="help_how_to_play">How to play:</string>
-    <string name="help_text_1">Use your finger to pull and tear spiderweb threads! You get points for every damaged thread.</string>
+    <string name="help_text_1">Pull and tear spiderweb threads! You get points for every damaged thread.</string>
     <string name="help_text_2">Try to throw all of the spiders off the screen! You get even more points for that.</string>
     <string name="help_text_3">Beware! Do not touch spiders directly, cause they can bite You.</string>
     <string name="help_text_4">New level is started when there are no more spiders on the screen.</string>

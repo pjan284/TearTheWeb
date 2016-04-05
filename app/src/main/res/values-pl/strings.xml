@@ -9,8 +9,8 @@
     <string name="game_lives">życia: %d</string>
     <string name="game_score">punkty: %d</string>
     <string name="help_how_to_play">Jak grać:</string>
-    <string name="help_text_1">Palcem pociągnij i zerwij nitki pajęczyny! Zdobędziesz punkty za każdą zerwaną nitkę.</string>
-    <string name="help_text_2">Spróbuj wyrzucić wszystkie pająki poza ekran. Zdobędziesz za to jeszcze więcej punktów.</string>
+    <string name="help_text_1">Szarp i zrywaj nitki pajęczyny! Zdobędziesz punkty za każdą zerwaną nitkę.</string>
+    <string name="help_text_2">Spróbuj wyrzucić wszystkie pająki poza ekran! Zdobędziesz za to jeszcze więcej punktów.</string>
     <string name="help_text_3">Uważaj! Nie dotykaj pająków bezpośrednio, bo mogą Cię ugryźć!</string>
     <string name="help_text_4">Nowy poziom zacznie się gdy na ekranie nie będzie już więcej pająków.</string>
     <string name="high_scores_action_clear">wyczyść</string>
